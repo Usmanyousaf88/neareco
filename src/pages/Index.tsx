@@ -6,6 +6,8 @@ import ProjectsGrid from '@/components/ProjectsGrid';
 import MasonryLayout from '@/components/MasonryLayout';
 import { categorizeProjects } from '@/utils/projectUtils';
 import type { ProjectsResponse } from '@/types/projects';
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 const fetchProjects = async (): Promise<ProjectsResponse> => {
   const response = await fetch('https://api.nearcatalog.xyz/projects');
@@ -25,6 +27,7 @@ const breakpointColumns = {
 
 const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [visibleCategories, setVisibleCategories] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
 
   const { data: projectsData, isLoading, error } = useQuery({
@@ -35,6 +38,18 @@ const Index = () => {
   const categorizedProjects = React.useMemo(() => {
     if (!projectsData) return {};
     return categorizeProjects(projectsData);
+  }, [projectsData]);
+
+  // Initialize visible categories when data loads
+  React.useEffect(() => {
+    if (projectsData) {
+      const categories = Object.keys(categorizeProjects(projectsData));
+      const initialVisibility = categories.reduce((acc, category) => {
+        acc[category] = true;
+        return acc;
+      }, {} as Record<string, boolean>);
+      setVisibleCategories(initialVisibility);
+    }
   }, [projectsData]);
 
   const handleCategoryClick = (key: string) => {
@@ -48,6 +63,13 @@ const Index = () => {
       });
       console.error("Error selecting category:", error);
     }
+  };
+
+  const toggleCategory = (category: string) => {
+    setVisibleCategories(prev => ({
+      ...prev,
+      [category]: !prev[category]
+    }));
   };
 
   if (isLoading) {
@@ -74,16 +96,37 @@ const Index = () => {
       <div className="max-w-[1800px] mx-auto">
         <h1 className="text-4xl font-bold mb-8 text-center">NEAR Protocol Ecosystem Map</h1>
         
-        <MasonryLayout breakpointColumns={breakpointColumns}>
+        <div className="flex flex-wrap gap-4 mb-8 justify-center">
           {Object.entries(categorizedProjects).map(([key, category]) => (
-            <CategoryCard
-              key={key}
-              title={category.title}
-              color={category.color}
-              projects={category.projects}
-              onClick={() => handleCategoryClick(key)}
-            />
+            <div key={key} className="flex items-center space-x-2">
+              <Checkbox
+                id={`category-${key}`}
+                checked={visibleCategories[key]}
+                onCheckedChange={() => toggleCategory(key)}
+                className="border-white data-[state=checked]:bg-white data-[state=checked]:text-black"
+              />
+              <Label
+                htmlFor={`category-${key}`}
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-white"
+              >
+                {category.title}
+              </Label>
+            </div>
           ))}
+        </div>
+
+        <MasonryLayout breakpointColumns={breakpointColumns}>
+          {Object.entries(categorizedProjects)
+            .filter(([key]) => visibleCategories[key])
+            .map(([key, category]) => (
+              <CategoryCard
+                key={key}
+                title={category.title}
+                color={category.color}
+                projects={category.projects}
+                onClick={() => handleCategoryClick(key)}
+              />
+            ))}
         </MasonryLayout>
 
         {selectedCategory && categorizedProjects[selectedCategory] && (
