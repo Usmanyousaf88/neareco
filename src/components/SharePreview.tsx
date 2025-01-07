@@ -22,24 +22,18 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
   useEffect(() => {
     if (!canvasRef.current) return;
 
-    // Initialize Fabric canvas with 16:9 aspect ratio
+    // Initialize Fabric canvas
     const canvas = new FabricCanvas(canvasRef.current, {
       width: 1920,
       height: 1080,
       backgroundColor: '#0a1929',
-      selection: false, // Disable group selection
-      interactive: false, // Disable all interactions
+      selection: false,
+      interactive: false,
     });
     
     fabricCanvasRef.current = canvas;
 
-    // Disable all interactive features
-    canvas.forEachObject((obj) => {
-      obj.selectable = false;
-      obj.evented = false;
-    });
-
-    // Draw visible categories and their projects
+    // Get visible categories
     const visibleCats = Object.entries(categories)
       .filter(([key]) => visibleCategories[key]);
 
@@ -48,139 +42,135 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
     const maxHeight = canvas.getHeight() - 120;
     const maxWidth = canvas.getWidth() - 120;
 
-    visibleCats.forEach(([key, category]) => {
-      // Create category header
-      const categoryText = new Text(category.title, {
-        left: currentX,
-        top: currentY,
-        fontSize: 36,
-        fill: '#ffffff',
-        fontWeight: 'bold',
-        width: 300,
-        selectable: false,
-        evented: false,
-      });
-
-      canvas.add(categoryText);
-      currentY += 80;
-
-      // Calculate card sizes based on project content
-      const projects = category.projects.map((project, index) => {
-        const nameLength = project.name.length;
-        const taglineLength = project.tagline?.length || 0;
-        
-        // Base card size with 16:9 aspect ratio
-        const width = Math.max(320, Math.min(480, nameLength * 10));
-        const height = width * (9/16);
-
-        return { 
-          ...project, 
-          width, 
-          height,
-          imageUrl: PLACEHOLDER_IMAGES[index % PLACEHOLDER_IMAGES.length]
-        };
-      });
-
-      // Arrange projects in a grid-like layout
-      projects.forEach(async (project) => {
-        if (currentX + project.width > maxWidth) {
-          currentX = 60;
-          currentY += project.height + 40;
-        }
-
-        if (currentY + project.height > maxHeight) {
-          currentY = 60;
-          currentX = Math.min(currentX + project.width + 40, maxWidth - project.width);
-        }
-
-        // Create card background
-        const card = new Rect({
+    // Draw each category and its projects
+    const drawCategories = async () => {
+      for (const [key, category] of visibleCats) {
+        // Add category title
+        const categoryText = new Text(category.title, {
           left: currentX,
           top: currentY,
-          width: project.width,
-          height: project.height,
-          fill: category.color || '#1a2e3b',
-          rx: 12,
-          ry: 12,
-          selectable: false,
-          evented: false,
-          shadow: new Shadow({
-            color: 'rgba(0,0,0,0.3)',
-            blur: 10,
-            offsetX: 0,
-            offsetY: 4
-          })
-        });
-
-        // Load and add project image
-        const addImage = () => {
-          return new Promise<void>((resolve) => {
-            Image.fromURL(project.imageUrl, (img) => {
-              img.scaleToWidth(project.width);
-              const scaledHeight = img.getScaledHeight();
-              if (scaledHeight > project.height * 0.6) {
-                img.scaleToHeight(project.height * 0.6);
-              }
-              
-              img.set({
-                left: currentX,
-                top: currentY,
-                selectable: false,
-                evented: false,
-                clipPath: new Rect({
-                  width: project.width,
-                  height: project.height * 0.6,
-                  rx: 12,
-                  ry: 12,
-                  absolutePositioned: true,
-                  left: currentX,
-                  top: currentY
-                })
-              });
-              
-              canvas.add(img);
-              resolve();
-            });
-          });
-        };
-
-        await addImage();
-
-        // Add project name
-        const nameText = new Text(project.name, {
-          left: currentX + 20,
-          top: currentY + project.height * 0.65,
-          fontSize: 24,
+          fontSize: 36,
           fill: '#ffffff',
           fontWeight: 'bold',
-          width: project.width - 40,
+          width: 300,
           selectable: false,
           evented: false,
         });
 
-        // Add project tagline if exists
-        if (project.tagline) {
-          const taglineText = new Text(project.tagline, {
+        canvas.add(categoryText);
+        currentY += 80;
+
+        // Process projects
+        for (const [index, project] of category.projects.entries()) {
+          const width = Math.max(320, Math.min(480, project.name.length * 10));
+          const height = width * (9/16);
+
+          // Check if we need to move to next row or column
+          if (currentX + width > maxWidth) {
+            currentX = 60;
+            currentY += height + 40;
+          }
+
+          if (currentY + height > maxHeight) {
+            currentY = 60;
+            currentX = Math.min(currentX + width + 40, maxWidth - width);
+          }
+
+          // Create card background
+          const card = new Rect({
+            left: currentX,
+            top: currentY,
+            width: width,
+            height: height,
+            fill: category.color || '#1a2e3b',
+            rx: 12,
+            ry: 12,
+            selectable: false,
+            evented: false,
+            shadow: new Shadow({
+              color: 'rgba(0,0,0,0.3)',
+              blur: 10,
+              offsetX: 0,
+              offsetY: 4
+            })
+          });
+
+          // Add project image
+          try {
+            await new Promise<void>((resolve) => {
+              const imageUrl = PLACEHOLDER_IMAGES[index % PLACEHOLDER_IMAGES.length];
+              Image.fromURL(imageUrl, {
+                callback: (img) => {
+                  img.scaleToWidth(width);
+                  const scaledHeight = img.getScaledHeight();
+                  if (scaledHeight > height * 0.6) {
+                    img.scaleToHeight(height * 0.6);
+                  }
+                  
+                  img.set({
+                    left: currentX,
+                    top: currentY,
+                    selectable: false,
+                    evented: false,
+                    clipPath: new Rect({
+                      width: width,
+                      height: height * 0.6,
+                      rx: 12,
+                      ry: 12,
+                      absolutePositioned: true,
+                      left: currentX,
+                      top: currentY
+                    })
+                  });
+                  
+                  canvas.add(img);
+                  resolve();
+                }
+              });
+            });
+          } catch (error) {
+            console.error('Failed to load image:', error);
+          }
+
+          // Add project name
+          const nameText = new Text(project.name, {
             left: currentX + 20,
-            top: currentY + project.height * 0.8,
-            fontSize: 16,
+            top: currentY + height * 0.65,
+            fontSize: 24,
             fill: '#ffffff',
-            width: project.width - 40,
-            lineHeight: 1.2,
-            opacity: 0.8,
+            fontWeight: 'bold',
+            width: width - 40,
             selectable: false,
             evented: false,
           });
-          canvas.add(taglineText);
+
+          // Add project tagline if exists
+          if (project.tagline) {
+            const taglineText = new Text(project.tagline, {
+              left: currentX + 20,
+              top: currentY + height * 0.8,
+              fontSize: 16,
+              fill: '#ffffff',
+              width: width - 40,
+              lineHeight: 1.2,
+              opacity: 0.8,
+              selectable: false,
+              evented: false,
+            });
+            canvas.add(taglineText);
+          }
+
+          canvas.add(card, nameText);
+          currentX += width + 40;
         }
 
-        canvas.add(card, nameText);
-        currentX += project.width + 40;
-      });
+        currentX = 60;
+        currentY += 320;
+      }
+    };
 
-      currentX = 60;
-      currentY += 320;
-    });
+    // Execute the drawing
+    drawCategories();
 
     return () => {
       canvas.dispose();
