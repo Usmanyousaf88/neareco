@@ -71,12 +71,15 @@ export const categoryColors: { [key: string]: string } = {
 
 // Define priority categories that should appear first
 const priorityCategories = [
-  'dapp',
   'defi',
   'nft',
   'infrastructure',
   'community',
-  'ecosystem-support'
+  'ecosystem-support',
+  'ai',
+  'dex',
+  'game',
+  'memecoin'
 ];
 
 export const categorizeProjects = (projectsData: ProjectsResponse): CategorizedProjects => {
