@@ -20,18 +20,42 @@ const ShareDialog = ({ open, onOpenChange, categories, visibleCategories }: Shar
   const handleCopy = async () => {
     try {
       const canvas = document.querySelector('#share-preview canvas') as HTMLCanvasElement;
-      if (!canvas) throw new Error('Canvas not found');
+      if (!canvas) {
+        throw new Error('Canvas not found');
+      }
 
-      const blob = await new Promise<Blob>((resolve) => canvas.toBlob((blob) => resolve(blob!)));
-      await navigator.clipboard.write([
-        new ClipboardItem({ 'image/png': blob })
-      ]);
+      // First try the newer ClipboardItem API
+      try {
+        const blob = await new Promise<Blob>((resolve, reject) => {
+          canvas.toBlob((blob) => {
+            if (blob) {
+              resolve(blob);
+            } else {
+              reject(new Error('Failed to create blob'));
+            }
+          }, 'image/png');
+        });
 
-      toast({
-        title: "Copied!",
-        description: "Image copied to clipboard",
-      });
+        await navigator.clipboard.write([
+          new ClipboardItem({ 'image/png': blob })
+        ]);
+
+        toast({
+          title: "Copied!",
+          description: "Image copied to clipboard",
+        });
+      } catch (clipboardError) {
+        // Fallback to copying canvas data URL
+        const dataUrl = canvas.toDataURL('image/png');
+        await navigator.clipboard.writeText(dataUrl);
+        
+        toast({
+          title: "Copied!",
+          description: "Image URL copied to clipboard",
+        });
+      }
     } catch (error) {
+      console.error('Copy failed:', error);
       toast({
         title: "Error",
         description: "Failed to copy image. Try downloading instead.",
@@ -41,18 +65,29 @@ const ShareDialog = ({ open, onOpenChange, categories, visibleCategories }: Shar
   };
 
   const handleDownload = () => {
-    const canvas = document.querySelector('#share-preview canvas') as HTMLCanvasElement;
-    if (!canvas) return;
+    try {
+      const canvas = document.querySelector('#share-preview canvas') as HTMLCanvasElement;
+      if (!canvas) {
+        throw new Error('Canvas not found');
+      }
 
-    const link = document.createElement('a');
-    link.download = 'near-ecosystem-map.png';
-    link.href = canvas.toDataURL('image/png');
-    link.click();
+      const link = document.createElement('a');
+      link.download = 'near-ecosystem-map.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
 
-    toast({
-      title: "Downloaded!",
-      description: "Image has been downloaded",
-    });
+      toast({
+        title: "Downloaded!",
+        description: "Image has been downloaded",
+      });
+    } catch (error) {
+      console.error('Download failed:', error);
+      toast({
+        title: "Error",
+        description: "Failed to download image. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleZoomIn = () => {
