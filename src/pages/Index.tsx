@@ -30,14 +30,26 @@ const fetchProjects = async (): Promise<ProjectsResponse> => {
 };
 
 const categoryColors: { [key: string]: string } = {
-  defi: "bg-blue-500",
-  infrastructure: "bg-purple-500",
-  nft: "bg-green-500",
-  wallet: "bg-yellow-500",
-  analytics: "bg-red-500",
-  community: "bg-indigo-500",
-  game: "bg-pink-500",
-  dapp: "bg-orange-500"
+  defi: "bg-indigo-600",
+  infrastructure: "bg-emerald-600",
+  nft: "bg-fuchsia-600",
+  wallet: "bg-amber-500",
+  analytics: "bg-cyan-600",
+  community: "bg-violet-600",
+  game: "bg-rose-600",
+  dapp: "bg-blue-600",
+  education: "bg-teal-600",
+  dao: "bg-purple-600",
+  bridge: "bg-orange-600",
+  identity: "bg-lime-600",
+  storage: "bg-pink-600",
+  security: "bg-red-600",
+  payments: "bg-sky-600",
+  explorer: "bg-green-600",
+  social: "bg-yellow-600",
+  marketplace: "bg-blue-500",
+  oracles: "bg-violet-500",
+  privacy: "bg-emerald-500"
 };
 
 const Index = () => {
