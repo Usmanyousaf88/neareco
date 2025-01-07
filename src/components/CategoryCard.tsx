@@ -15,21 +15,19 @@ interface CategoryCardProps {
 }
 
 const CategoryCard = ({ title, color, projects, onClick }: CategoryCardProps) => {
-  // Calculate rows needed based on project count (2 items per row)
-  const rowsNeeded = Math.ceil(projects.length / 2);
-  const minHeight = `${Math.max(rowsNeeded * 120, 200)}px`; // Minimum 200px height
-
   return (
     <motion.div
-      className={`${color} rounded-lg p-6 cursor-pointer`}
-      style={{ minHeight }}
+      className={`${color} rounded-lg p-6 cursor-pointer flex flex-col h-full`}
       whileHover={{ y: -5 }}
       onClick={onClick}
     >
       <h2 className="text-2xl font-bold mb-4">{title}</h2>
-      <div className="grid grid-cols-2 gap-4 auto-rows-min">
+      <div className="flex-1 flex flex-wrap gap-4">
         {projects.map((project) => (
-          <div key={project.name} className="flex flex-col items-center min-h-[100px]">
+          <div 
+            key={project.name} 
+            className="flex flex-col items-center basis-[calc(50%-0.5rem)] min-w-[120px]"
+          >
             <img
               src={project.image}
               alt={project.name}

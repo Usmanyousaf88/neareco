@@ -172,7 +172,7 @@ const Index = () => {
       <div className="max-w-7xl mx-auto">
         <h1 className="text-4xl font-bold mb-8 text-center">NEAR Protocol Ecosystem Map</h1>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-min">
+        <div className="flex flex-wrap gap-6">
           {Object.entries(categorizedProjects).map(([key, category]) => (
             <CategoryCard
               key={key}
