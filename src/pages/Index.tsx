@@ -11,16 +11,8 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from 'framer-motion';
 import html2canvas from 'html2canvas';
-import { Share2 } from 'lucide-react';
+import { Share2, Star } from 'lucide-react';
 import SharePreview from '@/components/SharePreview';
-
-const fetchProjects = async (): Promise<ProjectsResponse> => {
-  const response = await fetch('https://api.nearcatalog.xyz/projects');
-  if (!response.ok) {
-    throw new Error('Failed to fetch projects');
-  }
-  return response.json();
-};
 
 const breakpointColumns = {
   default: 5,
@@ -33,6 +25,7 @@ const breakpointColumns = {
 const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [visibleCategories, setVisibleCategories] = useState<Record<string, boolean>>({});
+  const [showOnlyFeatured, setShowOnlyFeatured] = useState(true);
   const { toast } = useToast();
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -50,12 +43,20 @@ const Index = () => {
     if (projectsData) {
       const categories = Object.keys(categorizeProjects(projectsData));
       const initialVisibility = categories.reduce((acc, category) => {
-        acc[category] = true;
+        acc[category] = !showOnlyFeatured;
         return acc;
       }, {} as Record<string, boolean>);
+
+      // Always show featured categories
+      Object.entries(categorizeProjects(projectsData)).forEach(([key, category]) => {
+        if (category.isPriority) {
+          initialVisibility[key] = true;
+        }
+      });
+
       setVisibleCategories(initialVisibility);
     }
-  }, [projectsData]);
+  }, [projectsData, showOnlyFeatured]);
 
   const handleCategoryClick = (categoryKey: string) => {
     setSelectedCategory(categoryKey);
@@ -127,6 +128,25 @@ const Index = () => {
     setVisibleCategories(updatedVisibility);
   };
 
+  const toggleFeatured = () => {
+    setShowOnlyFeatured(prev => !prev);
+    if (!showOnlyFeatured) {
+      // Switching to featured only
+      const updatedVisibility = { ...visibleCategories };
+      Object.entries(categorizedProjects).forEach(([key, category]) => {
+        updatedVisibility[key] = category.isPriority;
+      });
+      setVisibleCategories(updatedVisibility);
+    } else {
+      // Showing all
+      const updatedVisibility = Object.keys(visibleCategories).reduce((acc, category) => {
+        acc[category] = true;
+        return acc;
+      }, {} as Record<string, boolean>);
+      setVisibleCategories(updatedVisibility);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white flex items-center justify-center">
@@ -182,6 +202,16 @@ const Index = () => {
             <Button
               variant="outline"
               size="sm"
+              onClick={toggleFeatured}
+              className="mb-4 bg-white/5 text-white hover:bg-white/10 hover:text-white border-white/20"
+            >
+              <Star className="w-4 h-4 mr-2" />
+              {showOnlyFeatured ? 'Show All' : 'Show Featured'}
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
               onClick={handleShare}
               className="mb-4 bg-white/5 text-white hover:bg-white/10 hover:text-white border-white/20"
             >
@@ -212,7 +242,6 @@ const Index = () => {
               </motion.div>
             ))}
           </div>
-
         </motion.div>
 
         <div ref={contentRef}>
