@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Download, Copy, ZoomIn, ZoomOut } from "lucide-react";
+import { Download, Copy, ZoomIn, ZoomOut, Twitter } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import SharePreview from './SharePreview';
 import { CategorizedProjects } from '@/types/projects';
@@ -63,6 +63,21 @@ const ShareDialog = ({ open, onOpenChange, categories, visibleCategories }: Shar
     setZoom(prev => Math.max(prev - 0.1, 0.1));
   };
 
+  const handleTwitterShare = () => {
+    const text = "Check out this NEAR Protocol Ecosystem Map! 🚀";
+    const url = window.location.href;
+    const hashtags = "NEAR,Web3,Blockchain";
+    
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&hashtags=${encodeURIComponent(hashtags)}`;
+    
+    window.open(twitterUrl, '_blank');
+    
+    toast({
+      title: "Opening Twitter",
+      description: "Redirecting you to share on Twitter/X",
+    });
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[90vw] max-h-[90vh] overflow-hidden flex flex-col">
@@ -94,6 +109,10 @@ const ShareDialog = ({ open, onOpenChange, categories, visibleCategories }: Shar
               </span>
             </div>
             <div className="flex gap-2">
+              <Button onClick={handleTwitterShare} variant="outline">
+                <Twitter className="w-4 h-4 mr-2" />
+                Share on X
+              </Button>
               <Button onClick={handleCopy} variant="outline">
                 <Copy className="w-4 h-4 mr-2" />
                 Copy
