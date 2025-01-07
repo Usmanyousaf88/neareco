@@ -24,23 +24,25 @@ const MasonryLayout = ({ children, breakpointColumns }: MasonryLayoutProps) => {
           .masonry-grid_column {
             padding-left: 16px;
             background-clip: padding-box;
-            transition: transform 0.3s ease;
+            transition: all 0.3s ease;
           }
           .masonry-grid_column > div {
             margin-bottom: 16px;
-            transition: transform 0.3s ease;
+            transition: all 0.3s ease;
           }
         `}
       </style>
-      <AnimatePresence>
-        <Masonry
-          breakpointCols={breakpointColumns}
-          className="masonry-grid"
-          columnClassName="masonry-grid_column"
-        >
-          {children}
-        </Masonry>
-      </AnimatePresence>
+      <motion.div layout>
+        <AnimatePresence mode="popLayout">
+          <Masonry
+            breakpointCols={breakpointColumns}
+            className="masonry-grid"
+            columnClassName="masonry-grid_column"
+          >
+            {children}
+          </Masonry>
+        </AnimatePresence>
+      </motion.div>
     </>
   );
 };

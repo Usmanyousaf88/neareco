@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 interface Project {
   name: string;
@@ -21,7 +21,13 @@ const CategoryCard = ({ title, color, projects, onClick }: CategoryCardProps) =>
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.8 }}
-      transition={{ duration: 0.3 }}
+      transition={{ 
+        duration: 0.3,
+        layout: {
+          duration: 0.3,
+          ease: "easeInOut"
+        }
+      }}
       className={`${color} rounded-lg p-6 cursor-pointer flex flex-col w-full`}
       whileHover={{ y: -5 }}
       onClick={onClick}
