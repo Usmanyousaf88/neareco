@@ -35,12 +35,19 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
     const numColumns = 3;
     const numRows = Math.ceil(sections.length / numColumns);
     
-    const sectionWidth = (width - (padding * 2) - (sectionPadding * (numColumns - 1))) / numColumns;
-    const sectionHeight = (height - (padding * 2) - (sectionPadding * (numRows - 1))) / numRows;
-
+    // Calculate section sizes based on project count
+    const maxProjectsInSection = Math.max(...sections.map(([_, category]) => category.projects.length));
+    const minSectionHeight = 200; // Minimum height for sections
+    
     sections.forEach(([key, category], index) => {
       const col = index % numColumns;
       const row = Math.floor(index / numColumns);
+      
+      // Calculate dynamic section size based on content
+      const projectCount = category.projects.length;
+      const heightRatio = Math.max(projectCount / maxProjectsInSection, 0.5); // Minimum 50% of max height
+      const sectionHeight = Math.max(minSectionHeight, (height - (padding * 2) - (sectionPadding * (numRows - 1))) / numRows * heightRatio);
+      const sectionWidth = (width - (padding * 2) - (sectionPadding * (numColumns - 1))) / numColumns;
       
       const x = padding + (col * (sectionWidth + sectionPadding));
       const y = padding + (row * (sectionHeight + sectionPadding));
@@ -69,20 +76,18 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
         .text(category.title);
 
       // Layout projects in a grid
-      const maxProjectsToShow = 12;
-      const projectsPerRow = 4;
+      const projectsPerRow = Math.min(4, Math.ceil(Math.sqrt(category.projects.length)));
       const projectPadding = 10;
-      const availableWidth = sectionWidth - 40; // 20px padding on each side
-      const availableHeight = sectionHeight - 80; // Account for title and padding
+      const availableWidth = sectionWidth - 40;
+      const availableHeight = sectionHeight - 80;
+      
       const projectSize = Math.min(
         availableWidth / projectsPerRow - projectPadding,
-        availableHeight / Math.ceil(maxProjectsToShow / projectsPerRow) - projectPadding,
-        60 // Maximum size
+        availableHeight / Math.ceil(category.projects.length / projectsPerRow) - projectPadding,
+        60
       );
 
-      const visibleProjects = category.projects.slice(0, maxProjectsToShow);
-      
-      visibleProjects.forEach((project, projectIndex) => {
+      category.projects.forEach((project, projectIndex) => {
         const projectCol = projectIndex % projectsPerRow;
         const projectRow = Math.floor(projectIndex / projectsPerRow);
         
@@ -134,19 +139,6 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
           .attr("font-size", "12px")
           .text(project.name);
       });
-
-      // Add "+X more" text if there are more projects
-      if (category.projects.length > maxProjectsToShow) {
-        const remainingCount = category.projects.length - maxProjectsToShow;
-        section.append("text")
-          .attr("x", sectionWidth - 20)
-          .attr("y", sectionHeight - 20)
-          .attr("text-anchor", "end")
-          .attr("fill", "white")
-          .attr("opacity", 0.7)
-          .attr("font-size", "14px")
-          .text(`+${remainingCount} more`);
-      }
     });
 
     // Add title
