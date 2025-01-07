@@ -17,8 +17,8 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
     d3.select(svgRef.current).selectAll("*").remove();
 
     // Setup dimensions
-    const width = 1920; // Reduced from 3840 for better initial fit
-    const height = 1080; // Reduced from 2160 for better initial fit
+    const width = 1920;
+    const height = 1080;
     const padding = 40;
     const sectionPadding = 20;
 
@@ -69,14 +69,20 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
         .text(category.title);
 
       // Layout projects in a grid
+      const maxProjectsToShow = 12;
       const projectsPerRow = 4;
       const projectPadding = 10;
+      const availableWidth = sectionWidth - 40; // 20px padding on each side
+      const availableHeight = sectionHeight - 80; // Account for title and padding
       const projectSize = Math.min(
-        (sectionWidth - 40) / projectsPerRow - projectPadding,
-        60
+        availableWidth / projectsPerRow - projectPadding,
+        availableHeight / Math.ceil(maxProjectsToShow / projectsPerRow) - projectPadding,
+        60 // Maximum size
       );
 
-      category.projects.forEach((project, projectIndex) => {
+      const visibleProjects = category.projects.slice(0, maxProjectsToShow);
+      
+      visibleProjects.forEach((project, projectIndex) => {
         const projectCol = projectIndex % projectsPerRow;
         const projectRow = Math.floor(projectIndex / projectsPerRow);
         
@@ -128,6 +134,19 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
           .attr("font-size", "12px")
           .text(project.name);
       });
+
+      // Add "+X more" text if there are more projects
+      if (category.projects.length > maxProjectsToShow) {
+        const remainingCount = category.projects.length - maxProjectsToShow;
+        section.append("text")
+          .attr("x", sectionWidth - 20)
+          .attr("y", sectionHeight - 20)
+          .attr("text-anchor", "end")
+          .attr("fill", "white")
+          .attr("opacity", 0.7)
+          .attr("font-size", "14px")
+          .text(`+${remainingCount} more`);
+      }
     });
 
     // Add title
@@ -143,8 +162,8 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
   }, [categories, visibleCategories]);
 
   return (
-    <div className="w-full h-full" id="share-preview">
-      <svg ref={svgRef} style={{ maxWidth: '100%', height: 'auto' }} />
+    <div className="w-full h-full flex items-center justify-center" id="share-preview">
+      <svg ref={svgRef} className="w-full h-full" preserveAspectRatio="xMidYMid meet" />
     </div>
   );
 };

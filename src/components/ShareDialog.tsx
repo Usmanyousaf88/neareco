@@ -65,17 +65,16 @@ const ShareDialog = ({ open, onOpenChange, categories, visibleCategories }: Shar
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[90vw] max-h-[90vh] overflow-hidden">
+      <DialogContent className="max-w-[90vw] max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>Share Preview</DialogTitle>
         </DialogHeader>
-        <div className="flex flex-col gap-4">
-          <div className="relative bg-gray-900 rounded-lg overflow-auto max-h-[70vh]">
-            <div style={{ 
-              transform: `scale(${zoom})`,
-              transformOrigin: 'top left',
-              transition: 'transform 0.2s ease-out'
-            }}>
+        <div className="flex flex-col gap-4 flex-grow min-h-0">
+          <div className="relative bg-gray-900 rounded-lg overflow-auto flex-grow min-h-0">
+            <div 
+              className="origin-top-left transition-transform duration-200 ease-out h-full"
+              style={{ transform: `scale(${zoom})` }}
+            >
               <SharePreview 
                 categories={categories} 
                 visibleCategories={visibleCategories}
