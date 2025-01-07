@@ -33,14 +33,14 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
     // Use D3's treemap layout with more padding for titles
     const treemap = d3.treemap<any>()
       .size([availableWidth, availableHeight])
-      .padding(32)  // Increased padding between cards
+      .padding(32)
       .round(true);
 
     const root = d3.hierarchy({
       children: visibleCats.map(([key, category]) => ({
         key,
         category,
-        value: category.projects.length + 2 // Add padding for title space
+        value: category.projects.length + 2
       }))
     }).sum(d => d.value || 0);
 
@@ -63,11 +63,10 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
       const cardHeight = d.y1 - d.y0;
       const category = d.data.category;
       
-      const minIconSize = 64;  // Reduced minimum icon size
-      const maxIconSize = 88;  // Reduced maximum icon size
-      const padding = 16;      // Reduced padding
+      const minIconSize = 64;
+      const maxIconSize = 88;
+      const padding = 16;
       
-      // Calculate grid dimensions with more space for text
       const maxColumns = Math.floor((cardWidth - padding * 2) / (minIconSize + padding + 32));
       const maxRows = Math.floor((cardHeight - padding * 2 - 64) / (minIconSize + padding + 24));
       
@@ -79,6 +78,11 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
         Math.floor((cardHeight - padding * (maxRows + 1) - 64) / maxRows) - 24,
         maxIconSize
       );
+
+      const sanitizeName = (name: string) => {
+        // Replace special characters with spaces and trim
+        return name.replace(/[^\w\s-]/g, ' ').trim();
+      };
 
       card.html(`
         <div class="h-full bg-[#111827] border border-[#1d4ed8] rounded-xl p-4 flex flex-col">
@@ -92,13 +96,14 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
                      style="width: ${iconSize}px; height: ${iconSize}px">
                   <img
                     src="${project.image || '/placeholder.svg'}"
-                    alt="${project.name}"
+                    alt="${sanitizeName(project.name)}"
                     class="w-full h-full object-cover"
                     onerror="this.src='/placeholder.svg'"
                   />
                 </div>
-                <span class="text-white text-xs text-center w-full px-1 max-w-[${iconSize + 24}px] line-clamp-2" title="${project.name}">
-                  ${project.name}
+                <span class="text-white text-xs text-center w-full px-1 max-w-[${iconSize + 24}px] line-clamp-2" 
+                      title="${sanitizeName(project.name)}">
+                  ${sanitizeName(project.name)}
                 </span>
               </div>
             `).join('')}
