@@ -11,7 +11,7 @@ export const categoryColors: { [key: string]: string } = {
   nft: "bg-fuchsia-600",
   other: "bg-gray-600",
   utilities: "bg-slate-600",
-  "aurora virtual chain": "bg-amber-600",
+  "aurora-virtual-chain": "bg-amber-600",
   bitcoin: "bg-orange-600",
   accelerator: "bg-red-600",
   ai: "bg-cyan-600",
@@ -72,7 +72,7 @@ export const categoryColors: { [key: string]: string } = {
 // Define priority categories that should appear first (alphabetically ordered)
 const priorityCategories = [
   'ai',
-  'aurora virtual chain',
+  'aurora-virtual-chain',
   'borrowing-lending',
   'dex',
   'ecosystem-support',
@@ -92,7 +92,9 @@ export const categorizeProjects = (projectsData: ProjectsResponse): CategorizedP
   const tagCounts = new Map<string, number>();
   Object.values(projectsData).forEach((project) => {
     Object.keys(project.profile.tags).forEach((tag) => {
-      tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+      // Normalize the tag to use hyphens
+      const normalizedTag = tag.replace(/ /g, '-');
+      tagCounts.set(normalizedTag, (tagCounts.get(normalizedTag) || 0) + 1);
     });
   });
 
@@ -105,16 +107,18 @@ export const categorizeProjects = (projectsData: ProjectsResponse): CategorizedP
   sortedProjects.forEach((project) => {
     const projectTags = Object.keys(project.profile.tags);
     projectTags.forEach((tag) => {
-      if (!categories[tag]) {
-        categories[tag] = {
+      // Normalize the tag to use hyphens
+      const normalizedTag = tag.replace(/ /g, '-');
+      if (!categories[normalizedTag]) {
+        categories[normalizedTag] = {
           title: project.profile.tags[tag],
-          color: categoryColors[tag] || "bg-gray-500",
+          color: categoryColors[normalizedTag] || "bg-gray-500",
           projects: [],
-          isPriority: priorityCategories.includes(tag)
+          isPriority: priorityCategories.includes(normalizedTag)
         };
       }
-      if (!categories[tag].projects.find(p => p.name === project.profile.name)) {
-        categories[tag].projects.push({
+      if (!categories[normalizedTag].projects.find(p => p.name === project.profile.name)) {
+        categories[normalizedTag].projects.push({
           name: project.profile.name,
           image: project.profile.image.url,
           tagline: project.profile.tagline
