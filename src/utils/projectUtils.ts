@@ -103,8 +103,11 @@ export const categorizeProjects = (projectsData: ProjectsResponse): CategorizedP
   // Distribute projects across categories
   sortedProjects.forEach(([projectId, project]) => {
     Object.entries(project.profile.tags).forEach(([tag, value]) => {
-      console.log('Tag:', tag);
-      console.log('Project:', project.profile.name);
+      // Add specific logging for aurora-virtual-chain
+      if (tag === 'aurora-virtual-chain') {
+        console.log('Found aurora-virtual-chain project:', project.profile.name);
+        console.log('Project tags:', project.profile.tags);
+      }
       
       if (!categories[tag]) {
         categories[tag] = {
