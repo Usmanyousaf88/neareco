@@ -1,11 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Download, Copy, ZoomIn, ZoomOut, Twitter } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import html2canvas from 'html2canvas';
-import SharePreview from './SharePreview';
 import { CategorizedProjects } from '@/types/projects';
+import ShareDialogControls from './ShareDialogControls';
+import SharePreviewContainer from './SharePreviewContainer';
 
 interface ShareDialogProps {
   open: boolean;
@@ -20,7 +19,6 @@ const ShareDialog = ({ open, onOpenChange, categories, visibleCategories }: Shar
   const previewRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Calculate initial zoom to fit content
   useEffect(() => {
     if (open && containerRef.current && previewRef.current) {
       const container = containerRef.current;
@@ -34,8 +32,7 @@ const ShareDialog = ({ open, onOpenChange, categories, visibleCategories }: Shar
       const horizontalScale = containerWidth / previewWidth;
       const verticalScale = containerHeight / previewHeight;
       
-      // Use the smaller scale to ensure content fits both dimensions
-      const initialZoom = Math.min(horizontalScale, verticalScale) * 0.95; // 0.95 to add a small margin
+      const initialZoom = Math.min(horizontalScale, verticalScale) * 0.95;
       setZoom(initialZoom);
     }
   }, [open]);
@@ -44,7 +41,6 @@ const ShareDialog = ({ open, onOpenChange, categories, visibleCategories }: Shar
     if (!previewRef.current) return null;
     
     try {
-      // Reset zoom temporarily for capture
       const originalTransform = previewRef.current.style.transform;
       previewRef.current.style.transform = 'scale(1)';
       
@@ -58,7 +54,6 @@ const ShareDialog = ({ open, onOpenChange, categories, visibleCategories }: Shar
         allowTaint: true,
       });
       
-      // Restore zoom
       previewRef.current.style.transform = originalTransform;
       return canvas;
     } catch (error) {
@@ -72,7 +67,6 @@ const ShareDialog = ({ open, onOpenChange, categories, visibleCategories }: Shar
       const canvas = await capturePreview();
       if (!canvas) throw new Error('Failed to capture preview');
 
-      // Convert canvas to blob
       const blob = await new Promise<Blob>((resolve) => {
         canvas.toBlob((b) => {
           if (b) resolve(b);
@@ -80,7 +74,6 @@ const ShareDialog = ({ open, onOpenChange, categories, visibleCategories }: Shar
         }, 'image/png');
       });
 
-      // Create a ClipboardItem and write to clipboard
       const data = new ClipboardItem({ 'image/png': blob });
       await navigator.clipboard.write([data]);
 
@@ -103,7 +96,6 @@ const ShareDialog = ({ open, onOpenChange, categories, visibleCategories }: Shar
       const canvas = await capturePreview();
       if (!canvas) throw new Error('Failed to capture preview');
 
-      // Create download link
       const link = document.createElement('a');
       link.download = 'near-ecosystem-map.png';
       link.href = canvas.toDataURL('image/png');
@@ -123,14 +115,6 @@ const ShareDialog = ({ open, onOpenChange, categories, visibleCategories }: Shar
         variant: "destructive",
       });
     }
-  };
-
-  const handleZoomIn = () => {
-    setZoom(prev => Math.min(prev + 0.1, 2));
-  };
-
-  const handleZoomOut = () => {
-    setZoom(prev => Math.max(prev - 0.1, 0.1));
   };
 
   const handleTwitterShare = () => {
@@ -158,49 +142,22 @@ const ShareDialog = ({ open, onOpenChange, categories, visibleCategories }: Shar
         </DialogHeader>
         
         <div className="flex flex-col gap-4 flex-grow min-h-0">
-          <div 
-            ref={containerRef}
-            className="relative bg-gray-900 rounded-lg overflow-auto flex-grow min-h-0"
-          >
-            <div 
-              ref={previewRef}
-              className="origin-top-left transition-transform duration-200 ease-out absolute"
-              style={{ transform: `scale(${zoom})` }}
-            >
-              <SharePreview 
-                categories={categories} 
-                visibleCategories={visibleCategories}
-              />
-            </div>
-          </div>
+          <SharePreviewContainer
+            containerRef={containerRef}
+            previewRef={previewRef}
+            zoom={zoom}
+            categories={categories}
+            visibleCategories={visibleCategories}
+          />
           
-          <div className="flex gap-2 justify-between items-center">
-            <div className="flex gap-2">
-              <Button onClick={() => setZoom(prev => Math.max(prev - 0.1, 0.1))} variant="outline" size="icon">
-                <ZoomOut className="w-4 h-4" />
-              </Button>
-              <Button onClick={() => setZoom(prev => Math.min(prev + 0.1, 2))} variant="outline" size="icon">
-                <ZoomIn className="w-4 h-4" />
-              </Button>
-              <span className="flex items-center px-2 text-sm">
-                {Math.round(zoom * 100)}%
-              </span>
-            </div>
-            <div className="flex gap-2">
-              <Button onClick={handleTwitterShare} variant="outline">
-                <Twitter className="w-4 h-4 mr-2" />
-                Share on X
-              </Button>
-              <Button onClick={handleCopy} variant="outline">
-                <Copy className="w-4 h-4 mr-2" />
-                Copy
-              </Button>
-              <Button onClick={handleDownload}>
-                <Download className="w-4 h-4 mr-2" />
-                Download
-              </Button>
-            </div>
-          </div>
+          <ShareDialogControls
+            zoom={zoom}
+            onZoomIn={() => setZoom(prev => Math.min(prev + 0.1, 2))}
+            onZoomOut={() => setZoom(prev => Math.max(prev - 0.1, 0.1))}
+            onCopy={handleCopy}
+            onDownload={handleDownload}
+            onTwitterShare={handleTwitterShare}
+          />
         </div>
       </DialogContent>
     </Dialog>
