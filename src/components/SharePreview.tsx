@@ -23,8 +23,6 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
     const container = d3.select(containerRef.current);
     container.selectAll('.category-card').remove();
 
-    console.log('Rendering categories:', visibleCats);
-
     const width = 3840;
     const height = 2160;
     const padding = 20;
@@ -34,21 +32,24 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
     const availableWidth = width - (padding * 2);
     const availableHeight = height - titleHeight - (padding * 2);
 
-    // Calculate minimum size based on number of visible categories
-    const minSize = Math.sqrt((availableWidth * availableHeight) / visibleCats.length) * 0.8;
-
-    // Use D3's treemap layout with adjusted padding
+    // Base size calculation on the number of projects
+    const totalProjects = visibleCats.reduce((sum, [, category]) => sum + category.projects.length, 0);
+    const avgProjectsPerCategory = totalProjects / visibleCats.length;
+    
+    // Use D3's treemap layout with dynamic padding based on category count
     const treemap = d3.treemap<any>()
       .size([availableWidth, availableHeight])
-      .padding(16)
+      .padding(visibleCats.length > 12 ? 8 : 16)
       .round(true);
 
     const root = d3.hierarchy({
       children: visibleCats.map(([key, category]) => ({
         key,
         category,
-        // Adjust value calculation to ensure minimum size
-        value: Math.max(category.projects.length * 100, minSize * minSize)
+        value: Math.max(
+          category.projects.length,
+          avgProjectsPerCategory * 0.5 // Ensure minimum size relative to average
+        )
       }))
     }).sum(d => d.value || 0);
 
@@ -71,20 +72,21 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
       const cardHeight = d.y1 - d.y0;
       const category = d.data.category;
       
-      // Adjust icon sizes based on available space
-      const minIconSize = 48;
-      const maxIconSize = 72;
-      const padding = 12;
+      // Dynamic icon sizing based on available space and category size
+      const baseIconSize = Math.min(cardWidth, cardHeight) * 0.15;
+      const minIconSize = Math.max(32, Math.min(48, baseIconSize));
+      const maxIconSize = Math.min(64, baseIconSize);
+      const padding = Math.max(8, Math.min(12, baseIconSize * 0.2));
       
-      const maxColumns = Math.floor((cardWidth - padding * 2) / (minIconSize + padding));
-      const maxRows = Math.floor((cardHeight - padding * 2 - 48) / (minIconSize + padding));
+      const maxColumns = Math.max(2, Math.floor((cardWidth - padding * 2) / (minIconSize + padding)));
+      const maxRows = Math.max(2, Math.floor((cardHeight - padding * 2 - 40) / (minIconSize + padding)));
       
       const maxProjects = maxColumns * maxRows;
       const visibleProjects = category.projects.slice(0, maxProjects);
       
       const iconSize = Math.min(
-        Math.floor((cardWidth - padding * (maxColumns + 1)) / maxColumns) - 16,
-        Math.floor((cardHeight - padding * (maxRows + 1) - 48) / maxRows) - 16,
+        Math.floor((cardWidth - padding * (maxColumns + 1)) / maxColumns) - 8,
+        Math.floor((cardHeight - padding * (maxRows + 1) - 40) / maxRows) - 8,
         maxIconSize
       );
 
@@ -94,13 +96,13 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
       };
 
       card.html(`
-        <div class="h-full bg-[#111827] border border-[#1d4ed8] rounded-xl p-3 flex flex-col">
-          <h2 class="text-lg font-semibold text-[#60a5fa] mb-2 line-clamp-1">
+        <div class="h-full bg-[#111827] border border-[#1d4ed8] rounded-lg p-2 flex flex-col">
+          <h2 class="text-base font-semibold text-[#60a5fa] mb-2 line-clamp-1">
             ${category.title}
           </h2>
-          <div class="grid gap-2" style="grid-template-columns: repeat(auto-fill, minmax(${iconSize + 16}px, 1fr));">
+          <div class="grid gap-1" style="grid-template-columns: repeat(auto-fill, minmax(${iconSize + 8}px, 1fr));">
             ${visibleProjects.map(project => `
-              <div class="flex flex-col items-center gap-1">
+              <div class="flex flex-col items-center">
                 <div class="rounded-full bg-gray-800 overflow-hidden flex items-center justify-center"
                      style="width: ${iconSize}px; height: ${iconSize}px">
                   <img
@@ -110,7 +112,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
                     onerror="this.src='/placeholder.svg'"
                   />
                 </div>
-                <span class="text-white text-xs text-center w-full px-1 max-w-[${iconSize + 16}px] line-clamp-1" 
+                <span class="text-white text-xs text-center w-full px-1 max-w-[${iconSize + 8}px] line-clamp-1" 
                       title="${project.name}">
                   ${sanitizeName(project.name)}
                 </span>
