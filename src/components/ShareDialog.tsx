@@ -133,7 +133,7 @@ const ShareDialog = ({ open, onOpenChange, categories, visibleCategories }: Shar
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[90vw] max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="max-w-[90vw] h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Share Preview</DialogTitle>
           <DialogDescription>
@@ -141,7 +141,7 @@ const ShareDialog = ({ open, onOpenChange, categories, visibleCategories }: Shar
           </DialogDescription>
         </DialogHeader>
         
-        <div className="flex flex-col gap-4 flex-grow min-h-0">
+        <div className="flex-1 min-h-0 flex flex-col gap-4">
           <SharePreviewContainer
             containerRef={containerRef}
             previewRef={previewRef}
