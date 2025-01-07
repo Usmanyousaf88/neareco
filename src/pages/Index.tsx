@@ -68,14 +68,24 @@ const Index = () => {
         description: "Please wait while we create your share image.",
       });
 
-      const sharePreviewElement = document.querySelector('svg');
-      if (!sharePreviewElement) return;
+      const element = document.getElementById('share-preview');
+      if (!element) {
+        throw new Error('Share preview element not found');
+      }
 
-      const canvas = await html2canvas(sharePreviewElement, {
+      const canvas = await html2canvas(element, {
         width: 3840,
         height: 2160,
         scale: 1,
         backgroundColor: null,
+        logging: true,
+        onclone: (clonedDoc) => {
+          const clonedElement = clonedDoc.getElementById('share-preview');
+          if (clonedElement) {
+            clonedElement.style.width = '3840px';
+            clonedElement.style.height = '2160px';
+          }
+        }
       });
 
       const image = canvas.toDataURL('image/png');

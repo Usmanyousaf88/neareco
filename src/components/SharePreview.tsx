@@ -24,6 +24,7 @@ const SharePreview = ({ categories }: SharePreviewProps) => {
     const svg = d3.select(svgRef.current)
       .attr("width", width)
       .attr("height", height)
+      .attr("viewBox", `0 0 ${width} ${height}`)
       .style("background", "rgb(17, 24, 39)");
 
     // Create sections layout
@@ -124,7 +125,7 @@ const SharePreview = ({ categories }: SharePreviewProps) => {
   }, [categories]);
 
   return (
-    <div className="fixed left-[-9999px] top-[-9999px]">
+    <div className="w-full h-full" id="share-preview">
       <svg ref={svgRef} />
     </div>
   );
