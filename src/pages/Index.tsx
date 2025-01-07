@@ -3,6 +3,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery } from '@tanstack/react-query';
 import CategoryCard from '@/components/CategoryCard';
 import ProjectsGrid from '@/components/ProjectsGrid';
+import Masonry from 'react-masonry-css';
 
 interface Project {
   slug: string;
@@ -167,12 +168,41 @@ const Index = () => {
     );
   }
 
+  const breakpointColumns = {
+    default: 5,
+    1400: 4,
+    1100: 3,
+    700: 2,
+    500: 1
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white p-8">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-[1800px] mx-auto">
         <h1 className="text-4xl font-bold mb-8 text-center">NEAR Protocol Ecosystem Map</h1>
         
-        <div className="flex flex-wrap gap-6">
+        <style>
+          {`
+            .masonry-grid {
+              display: flex;
+              width: 100%;
+              margin-left: -16px; /* gutter size offset */
+            }
+            .masonry-grid_column {
+              padding-left: 16px; /* gutter size */
+              background-clip: padding-box;
+            }
+            .masonry-grid_column > div {
+              margin-bottom: 16px;
+            }
+          `}
+        </style>
+
+        <Masonry
+          breakpointCols={breakpointColumns}
+          className="masonry-grid"
+          columnClassName="masonry-grid_column"
+        >
           {Object.entries(categorizedProjects).map(([key, category]) => (
             <CategoryCard
               key={key}
@@ -182,7 +212,7 @@ const Index = () => {
               onClick={() => handleCategoryClick(key)}
             />
           ))}
-        </div>
+        </Masonry>
 
         {selectedCategory && categorizedProjects[selectedCategory] && (
           <ProjectsGrid

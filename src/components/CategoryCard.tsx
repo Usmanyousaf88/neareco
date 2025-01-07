@@ -17,16 +17,16 @@ interface CategoryCardProps {
 const CategoryCard = ({ title, color, projects, onClick }: CategoryCardProps) => {
   return (
     <motion.div
-      className={`${color} rounded-lg p-6 cursor-pointer flex flex-col h-full`}
+      className={`${color} rounded-lg p-6 cursor-pointer flex flex-col w-full`}
       whileHover={{ y: -5 }}
       onClick={onClick}
     >
       <h2 className="text-2xl font-bold mb-4">{title}</h2>
-      <div className="flex-1 flex flex-wrap gap-4">
+      <div className="flex flex-wrap gap-3">
         {projects.map((project) => (
           <div 
             key={project.name} 
-            className="flex flex-col items-center basis-[calc(50%-0.5rem)] min-w-[120px]"
+            className="flex flex-col items-center basis-[calc(50%-0.375rem)]"
           >
             <img
               src={project.image}
