@@ -1,6 +1,6 @@
 import React, { useRef, useMemo } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { Text, OrbitControls, PerspectiveCamera } from '@react-three/drei';
+import { Canvas } from '@react-three/fiber';
+import { Text, OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import { CategorizedProjects } from '@/types/projects';
 
@@ -14,18 +14,11 @@ interface NodeProps {
 const Node: React.FC<NodeProps> = ({ position, name, color = '#1e88e5', scale = 1 }) => {
   const mesh = useRef<THREE.Mesh>(null);
 
-  useFrame(() => {
-    if (mesh.current) {
-      mesh.current.rotation.x += 0.005;
-      mesh.current.rotation.y += 0.005;
-    }
-  });
-
   return (
     <group position={position}>
       <mesh ref={mesh}>
         <octahedronGeometry args={[scale * 0.5, 0]} />
-        <meshPhongMaterial color={color} />
+        <meshStandardMaterial color={color} />
       </mesh>
       <Text
         position={[0, -scale * 0.8, 0]}
@@ -92,8 +85,12 @@ const EcosystemMap3D: React.FC<EcosystemMap3DProps> = ({ categories, visibleCate
 
   return (
     <div className="w-full h-full bg-slate-900 rounded-lg">
-      <Canvas>
-        <PerspectiveCamera makeDefault position={[0, 20, 35]} />
+      <Canvas
+        camera={{ position: [0, 20, 35], fov: 75 }}
+        style={{ background: '#0a1929' }}
+      >
+        <ambientLight intensity={0.5} />
+        <pointLight position={[10, 10, 10]} intensity={1} />
         <OrbitControls 
           enablePan={true}
           enableZoom={true}
@@ -101,9 +98,7 @@ const EcosystemMap3D: React.FC<EcosystemMap3DProps> = ({ categories, visibleCate
           minDistance={10}
           maxDistance={50}
         />
-        <ambientLight intensity={0.5} />
-        <pointLight position={[10, 10, 10]} intensity={1} />
-        <fog attach="fog" args={['#000', 20, 80]} />
+        <fog attach="fog" args={['#0a1929', 20, 80]} />
         {nodes.map((node, index) => (
           <Node key={`${node.name}-${index}`} {...node} />
         ))}
