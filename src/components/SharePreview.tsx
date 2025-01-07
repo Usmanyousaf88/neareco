@@ -12,32 +12,32 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
     .sort((a, b) => a[1].title.localeCompare(b[1].title));
 
   return (
-    <div className="w-[1920px] h-[1080px] bg-[#0A0F1C] p-10 text-left overflow-hidden">
+    <div className="w-[1920px] h-[1080px] bg-[#0A0F1C] p-8 text-left">
       {/* Title */}
-      <h1 className="text-4xl font-bold text-white mb-4">
+      <h1 className="text-3xl font-bold text-white mb-4">
         NEAR Protocol Ecosystem Map
       </h1>
 
       {/* Grid Container */}
-      <div className="grid grid-cols-3 gap-6 mt-2 h-[calc(100%-120px)] overflow-hidden">
+      <div className="grid grid-cols-3 gap-4 h-[calc(100%-100px)]">
         {visibleCats.map(([key, category]) => (
           <div
             key={key}
-            className="bg-[#111827] border border-blue-500 rounded-lg p-4 flex flex-col overflow-hidden"
+            className="bg-[#111827] border border-blue-500 rounded-lg p-4 flex flex-col"
           >
             {/* Category Title */}
-            <h2 className="text-xl font-semibold text-blue-400 mb-4">
+            <h2 className="text-lg font-semibold text-blue-400 mb-3">
               {category.title}
             </h2>
 
             {/* Projects Grid */}
-            <div className="grid grid-cols-4 gap-3 overflow-y-auto">
+            <div className="grid grid-cols-5 gap-2">
               {category.projects.map((project, index) => (
                 <div
                   key={`${key}-${index}`}
-                  className="flex flex-col items-center gap-1.5"
+                  className="flex flex-col items-center gap-1"
                 >
-                  <div className="w-8 h-8 rounded-full bg-gray-800 overflow-hidden flex items-center justify-center">
+                  <div className="w-6 h-6 rounded-full bg-gray-800 overflow-hidden flex items-center justify-center">
                     {project.image ? (
                       <img
                         src={project.image}
@@ -57,7 +57,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
                     )}
                   </div>
                   <span 
-                    className="text-white text-xs truncate text-center w-full px-1" 
+                    className="text-white text-[10px] truncate text-center w-full px-0.5" 
                     title={project.name}
                   >
                     {project.name}
@@ -70,7 +70,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
       </div>
 
       {/* Footer */}
-      <div className="absolute bottom-6 right-8 text-gray-500 text-sm">
+      <div className="absolute bottom-4 right-6 text-gray-500 text-xs">
         Updated: {new Date().toLocaleDateString()}
       </div>
     </div>
