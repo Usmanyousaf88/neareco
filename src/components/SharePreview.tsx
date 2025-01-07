@@ -1,5 +1,6 @@
 import React from 'react';
 import { CategorizedProjects } from '@/types/projects';
+import Image from 'next/image';
 
 interface SharePreviewProps {
   categories: CategorizedProjects;
@@ -39,10 +40,30 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
               {category.projects.map((project, index) => (
                 <div
                   key={`${key}-${index}`}
-                  className="text-white text-sm truncate"
-                  title={project.name}
+                  className="flex flex-col items-center gap-2"
                 >
-                  {project.name}
+                  <div className="w-8 h-8 rounded-full bg-gray-800 overflow-hidden flex items-center justify-center">
+                    {project.image ? (
+                      <img
+                        src={project.image}
+                        alt={project.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = '/placeholder.svg';
+                        }}
+                      />
+                    ) : (
+                      <img
+                        src="/placeholder.svg"
+                        alt={project.name}
+                        className="w-full h-full object-cover"
+                      />
+                    )}
+                  </div>
+                  <span className="text-white text-sm truncate text-center" title={project.name}>
+                    {project.name}
+                  </span>
                 </div>
               ))}
             </div>
