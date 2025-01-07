@@ -91,7 +91,6 @@ export const categorizeProjects = (projectsData: ProjectsResponse): CategorizedP
   const tagCounts = new Map<string, number>();
   Object.values(projectsData).forEach((project) => {
     Object.entries(project.profile.tags).forEach(([tag, value]) => {
-      // Normalize tag to lowercase and replace spaces with hyphens
       const normalizedTag = tag.toLowerCase().trim().replace(/\s+/g, '-');
       tagCounts.set(normalizedTag, (tagCounts.get(normalizedTag) || 0) + 1);
     });
@@ -105,14 +104,15 @@ export const categorizeProjects = (projectsData: ProjectsResponse): CategorizedP
   // Distribute projects across categories
   sortedProjects.forEach(([projectId, project]) => {
     Object.entries(project.profile.tags).forEach(([tag, value]) => {
-      // Normalize tag to lowercase and replace spaces with hyphens
       const normalizedTag = tag.toLowerCase().trim().replace(/\s+/g, '-');
       
-      // Special handling for Aurora Virtual Chain
-      const finalTag = normalizedTag === 'aurora-virtual-chain' || 
-                      normalizedTag === 'aurora' || 
-                      normalizedTag === 'aurora-chain' ? 
-                      'aurora-virtual-chain' : normalizedTag;
+      // Special handling for Aurora-related tags
+      let finalTag = normalizedTag;
+      if (normalizedTag === 'aurora-virtual-chain' || normalizedTag === 'aurora-chain') {
+        finalTag = 'aurora-virtual-chain';
+      } else if (normalizedTag === 'aurora') {
+        finalTag = 'aurora'; // Keep Aurora projects separate
+      }
       
       if (!categories[finalTag]) {
         categories[finalTag] = {
