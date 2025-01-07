@@ -11,8 +11,14 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const visibleCats = Object.entries(categories)
-    .filter(([key]) => visibleCategories[key])
+    .filter(([key]) => {
+      console.log(`Category ${key} visibility:`, visibleCategories[key]);
+      return visibleCategories[key];
+    })
     .sort((a, b) => a[1].title.localeCompare(b[1].title));
+
+  console.log('Visible categories:', visibleCats.map(([key]) => key));
+  console.log('Aurora virtual chain projects:', categories['aurora-virtual-chain']?.projects);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -20,6 +26,10 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
     // Clear any existing content
     const container = d3.select(containerRef.current);
     container.selectAll('.category-card').remove();
+
+    console.log('Rendering categories:', visibleCats);
+    console.log('Categories data:', categories);
+    console.log('Visibility state:', visibleCategories);
 
     const width = 3840;
     const height = 2160;
