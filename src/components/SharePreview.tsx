@@ -29,57 +29,50 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
     const height = 2160;
     const padding = 20;
     const titleHeight = 80;
+    const minCategoryWidth = 600; // Minimum width for each category
+    const minCategoryHeight = 400; // Minimum height for each category
 
     // Available space for the grid
     const availableWidth = width - (padding * 2);
     const availableHeight = height - titleHeight - (padding * 2);
 
-    // Use D3's treemap layout with more padding for titles
-    const treemap = d3.treemap<any>()
-      .size([availableWidth, availableHeight])
-      .padding(32)
-      .round(true);
+    // Calculate optimal grid layout
+    const totalCategories = visibleCats.length;
+    const aspectRatio = availableWidth / availableHeight;
+    const cols = Math.ceil(Math.sqrt(totalCategories * aspectRatio));
+    const rows = Math.ceil(totalCategories / cols);
 
-    const root = d3.hierarchy({
-      children: visibleCats.map(([key, category]) => ({
-        key,
-        category,
-        value: category.projects.length + 2
-      }))
-    }).sum(d => d.value || 0);
+    // Calculate cell dimensions
+    const cellWidth = Math.max(minCategoryWidth, Math.floor(availableWidth / cols));
+    const cellHeight = Math.max(minCategoryHeight, Math.floor(availableHeight / rows));
 
-    treemap(root);
+    // Create grid layout
+    visibleCats.forEach(([key, category], index) => {
+      const row = Math.floor(index / cols);
+      const col = index % cols;
+      const x = padding + (col * cellWidth);
+      const y = titleHeight + padding + (row * cellHeight);
 
-    // Apply calculated dimensions to DOM
-    const cards = container.select('.grid-container')
-      .selectAll('.category-card')
-      .data(root.leaves())
-      .join('div')
-      .attr('class', 'category-card absolute')
-      .style('left', d => `${d.x0 + padding}px`)
-      .style('top', d => `${d.y0 + titleHeight + padding}px`)
-      .style('width', d => `${d.x1 - d.x0}px`)
-      .style('height', d => `${d.y1 - d.y0}px`);
+      const card = container.append('div')
+        .attr('class', 'category-card absolute')
+        .style('left', `${x}px`)
+        .style('top', `${y}px`)
+        .style('width', `${cellWidth - 32}px`)
+        .style('height', `${cellHeight - 32}px`);
 
-    cards.each(function(d: any) {
-      const card = d3.select(this);
-      const cardWidth = d.x1 - d.x0;
-      const cardHeight = d.y1 - d.y0;
-      const category = d.data.category;
-      
       const minIconSize = 64;
       const maxIconSize = 88;
-      const padding = 16;
+      const cardPadding = 16;
       
-      const maxColumns = Math.floor((cardWidth - padding * 2) / (minIconSize + padding + 32));
-      const maxRows = Math.floor((cardHeight - padding * 2 - 64) / (minIconSize + padding + 24));
+      const maxColumns = Math.floor((cellWidth - cardPadding * 2) / (minIconSize + cardPadding + 32));
+      const maxRows = Math.floor((cellHeight - cardPadding * 2 - 64) / (minIconSize + cardPadding + 24));
       
       const maxProjects = maxColumns * maxRows;
       const visibleProjects = category.projects.slice(0, maxProjects);
       
       const iconSize = Math.min(
-        Math.floor((cardWidth - padding * (maxColumns + 1)) / maxColumns) - 32,
-        Math.floor((cardHeight - padding * (maxRows + 1) - 64) / maxRows) - 24,
+        Math.floor((cellWidth - cardPadding * (maxColumns + 1)) / maxColumns) - 32,
+        Math.floor((cellHeight - cardPadding * (maxRows + 1) - 64) / maxRows) - 24,
         maxIconSize
       );
 
