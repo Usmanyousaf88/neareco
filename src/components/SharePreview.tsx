@@ -125,7 +125,7 @@ const SharePreview = ({ categories }: SharePreviewProps) => {
   }, [categories]);
 
   return (
-    <div className="w-full h-full" id="share-preview">
+    <div className="fixed left-[-9999px] top-[-9999px]" id="share-preview">
       <svg ref={svgRef} />
     </div>
   );
