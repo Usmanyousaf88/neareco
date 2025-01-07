@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React from 'react';
 import SharePreview from './SharePreview';
 import { CategorizedProjects } from '@/types/projects';
 
@@ -20,7 +20,7 @@ const SharePreviewContainer = ({
   return (
     <div 
       ref={containerRef}
-      className="relative bg-gray-900 rounded-lg overflow-auto flex-grow min-h-0"
+      className="relative bg-gray-900 rounded-lg overflow-auto flex-1 min-h-0 h-full"
     >
       <div 
         ref={previewRef}
