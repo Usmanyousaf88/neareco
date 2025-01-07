@@ -17,43 +17,16 @@ const ShareDialog = ({ open, onOpenChange, categories, visibleCategories }: Shar
   const { toast } = useToast();
   const [zoom, setZoom] = useState(1);
 
-  const svgToCanvas = async (): Promise<HTMLCanvasElement> => {
-    const svg = document.querySelector('#share-preview svg') as SVGElement;
-    if (!svg) {
-      throw new Error('SVG not found');
-    }
-
-    // Get SVG data
-    const svgData = new XMLSerializer().serializeToString(svg);
-    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-    const svgUrl = URL.createObjectURL(svgBlob);
-
-    // Create image from SVG
-    const img = new Image();
-    await new Promise((resolve, reject) => {
-      img.onload = resolve;
-      img.onerror = reject;
-      img.src = svgUrl;
-    });
-
-    // Create canvas and draw image
-    const canvas = document.createElement('canvas');
-    canvas.width = svg.clientWidth;
-    canvas.height = svg.clientHeight;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) {
-      throw new Error('Could not get canvas context');
-    }
-    ctx.drawImage(img, 0, 0);
-
-    // Cleanup
-    URL.revokeObjectURL(svgUrl);
-    return canvas;
+  const getCanvas = (): HTMLCanvasElement | null => {
+    return document.querySelector('#share-preview canvas');
   };
 
   const handleCopy = async () => {
     try {
-      const canvas = await svgToCanvas();
+      const canvas = getCanvas();
+      if (!canvas) {
+        throw new Error('Canvas not found');
+      }
 
       // First try the newer ClipboardItem API
       try {
@@ -97,7 +70,11 @@ const ShareDialog = ({ open, onOpenChange, categories, visibleCategories }: Shar
 
   const handleDownload = async () => {
     try {
-      const canvas = await svgToCanvas();
+      const canvas = getCanvas();
+      if (!canvas) {
+        throw new Error('Canvas not found');
+      }
+
       const link = document.createElement('a');
       link.download = 'near-ecosystem-map.png';
       link.href = canvas.toDataURL('image/png');
@@ -149,6 +126,7 @@ const ShareDialog = ({ open, onOpenChange, categories, visibleCategories }: Shar
         <div className="flex flex-col gap-4 flex-grow min-h-0">
           <div className="relative bg-gray-900 rounded-lg overflow-auto flex-grow min-h-0">
             <div 
+              id="share-preview"
               className="origin-top-left transition-transform duration-200 ease-out h-full"
               style={{ transform: `scale(${zoom})` }}
             >

@@ -101,29 +101,36 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
         });
 
         // Load and add project image
-        Image.fromURL(project.imageUrl, (img) => {
-          img.scaleToWidth(project.width);
-          const scaledHeight = img.getScaledHeight();
-          if (scaledHeight > project.height * 0.6) {
-            img.scaleToHeight(project.height * 0.6);
-          }
-          
-          img.set({
-            left: currentX,
-            top: currentY,
-            clipPath: new Rect({
-              width: project.width,
-              height: project.height * 0.6,
-              rx: 12,
-              ry: 12,
-              absolutePositioned: true,
-              left: currentX,
-              top: currentY
-            })
+        const addImage = () => {
+          return new Promise<void>((resolve) => {
+            Image.fromURL(project.imageUrl, (img: any) => {
+              img.scaleToWidth(project.width);
+              const scaledHeight = img.getScaledHeight();
+              if (scaledHeight > project.height * 0.6) {
+                img.scaleToHeight(project.height * 0.6);
+              }
+              
+              img.set({
+                left: currentX,
+                top: currentY,
+                clipPath: new Rect({
+                  width: project.width,
+                  height: project.height * 0.6,
+                  rx: 12,
+                  ry: 12,
+                  absolutePositioned: true,
+                  left: currentX,
+                  top: currentY
+                })
+              });
+              
+              canvas.add(img);
+              resolve();
+            });
           });
-          
-          canvas.add(img);
-        });
+        };
+
+        await addImage();
 
         // Add project name
         const nameText = new Text(project.name, {
