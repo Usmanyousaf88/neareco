@@ -90,8 +90,8 @@ export const categorizeProjects = (projectsData: ProjectsResponse): CategorizedP
   // Calculate total projects per tag for better distribution
   const tagCounts = new Map<string, number>();
   Object.values(projectsData).forEach((project) => {
-    Object.entries(project.profile.tags).forEach(([tag, value]) => {
-      const normalizedTag = tag.toLowerCase().trim().replace(/\s+/g, '-');
+    Object.entries(project.profile.tags).forEach(([tag]) => {
+      const normalizedTag = tag.toLowerCase().trim().replace(/[\s-]+/g, '-');
       tagCounts.set(normalizedTag, (tagCounts.get(normalizedTag) || 0) + 1);
     });
   });
@@ -104,11 +104,17 @@ export const categorizeProjects = (projectsData: ProjectsResponse): CategorizedP
   // Distribute projects across categories
   sortedProjects.forEach(([projectId, project]) => {
     Object.entries(project.profile.tags).forEach(([tag, value]) => {
-      const normalizedTag = tag.toLowerCase().trim().replace(/\s+/g, '-');
+      // Normalize tag consistently for both the key and when checking existence
+      const normalizedTag = tag.toLowerCase().trim().replace(/[\s-]+/g, '-');
+      
+      // Add console logs to debug tag normalization
+      console.log('Original tag:', tag);
+      console.log('Normalized tag:', normalizedTag);
+      console.log('Project:', project.profile.name);
       
       if (!categories[normalizedTag]) {
         categories[normalizedTag] = {
-          title: value, // Use the original tag value as the display title
+          title: value,
           color: categoryColors[normalizedTag] || "bg-gray-500",
           projects: [],
           isPriority: priorityCategories.includes(normalizedTag)
