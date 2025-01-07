@@ -23,7 +23,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
 
     const width = 1920;
     const height = 1080;
-    const padding = 20;  // Reduced from 40
+    const padding = 20;
     const titleHeight = 60;
 
     // Available space for the grid
@@ -33,7 +33,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
     // Use D3's treemap layout
     const treemap = d3.treemap<any>()
       .size([availableWidth, availableHeight])
-      .padding(12)  // Reduced from 16
+      .padding(12)
       .round(true);
 
     const root = d3.hierarchy({
@@ -52,8 +52,8 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
       .data(root.leaves())
       .join('div')
       .attr('class', 'category-card absolute')
-      .style('left', d => `${d.x0}px`)
-      .style('top', d => `${d.y0 + titleHeight}px`)
+      .style('left', d => `${d.x0 + padding}px`)
+      .style('top', d => `${d.y0 + titleHeight + padding}px`)
       .style('width', d => `${d.x1 - d.x0}px`)
       .style('height', d => `${d.y1 - d.y0}px`);
 
@@ -65,7 +65,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
       
       const minIconSize = 40;
       const maxIconSize = 60;
-      const padding = 12;  // Reduced from 16
+      const padding = 12;
       
       const maxColumns = Math.floor((cardWidth - padding) / (minIconSize + padding));
       const maxRows = Math.floor((cardHeight - padding - 40) / (minIconSize + padding + 20));
@@ -113,7 +113,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
         NEAR Protocol Ecosystem Map
       </h1>
       
-      <div className="grid-container absolute inset-0 pt-[60px] px-[20px] pb-[20px] h-[calc(100%-80px)]">
+      <div className="grid-container absolute inset-0 pt-[60px] px-[20px] pb-[20px]">
         {/* D3 will inject content here */}
       </div>
     </div>
