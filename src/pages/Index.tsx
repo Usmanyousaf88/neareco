@@ -174,7 +174,7 @@ const Index = () => {
               variant="outline"
               size="sm"
               onClick={toggleAllCategories}
-              className="mb-4"
+              className="mb-4 text-white hover:text-white"
             >
               {areAllChecked ? 'Uncheck All' : 'Check All'}
             </Button>
@@ -183,7 +183,7 @@ const Index = () => {
               variant="outline"
               size="sm"
               onClick={handleShare}
-              className="mb-4"
+              className="mb-4 text-white hover:text-white"
             >
               <Share2 className="w-4 h-4 mr-2" />
               Share
@@ -225,7 +225,6 @@ const Index = () => {
                     title={category.title}
                     color={category.color}
                     projects={category.projects}
-                    onClick={() => handleCategoryClick(key)}
                     isPriority={category.isPriority}
                   />
                 ))}
