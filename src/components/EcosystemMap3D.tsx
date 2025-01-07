@@ -17,8 +17,12 @@ const Node: React.FC<NodeProps> = ({ position, name, color = '#1e88e5', scale = 
   return (
     <group position={position}>
       <mesh ref={mesh}>
-        <octahedronGeometry args={[scale * 0.5, 0]} />
-        <meshStandardMaterial color={color} />
+        <sphereGeometry args={[scale * 0.5, 32, 32]} />
+        <meshStandardMaterial 
+          color={color}
+          roughness={0.5}
+          metalness={0.5}
+        />
       </mesh>
       <Text
         position={[0, -scale * 0.8, 0]}
@@ -26,6 +30,7 @@ const Node: React.FC<NodeProps> = ({ position, name, color = '#1e88e5', scale = 
         color="white"
         anchorX="center"
         anchorY="middle"
+        renderOrder={1}
       >
         {name}
       </Text>
@@ -48,12 +53,10 @@ const EcosystemMap3D: React.FC<EcosystemMap3DProps> = ({ categories, visibleCate
     Object.entries(categories).forEach(([key, category]) => {
       if (!visibleCategories[key]) return;
 
-      // Calculate category center position
       const angle = (categoryIndex * 2 * Math.PI) / categoryCount;
       const centerX = Math.cos(angle) * radius;
       const centerZ = Math.sin(angle) * radius;
 
-      // Add category node
       visibleNodes.push({
         position: [centerX, 0, centerZ],
         name: category.title,
@@ -61,7 +64,6 @@ const EcosystemMap3D: React.FC<EcosystemMap3DProps> = ({ categories, visibleCate
         scale: 2
       });
 
-      // Add project nodes around category
       const projectCount = category.projects.length;
       const projectRadius = 5;
       
@@ -86,17 +88,30 @@ const EcosystemMap3D: React.FC<EcosystemMap3DProps> = ({ categories, visibleCate
   return (
     <div className="w-full h-full bg-slate-900 rounded-lg">
       <Canvas
-        camera={{ position: [0, 20, 35], fov: 75 }}
+        gl={{ 
+          antialias: true,
+          alpha: false,
+          powerPreference: "high-performance"
+        }}
+        camera={{ 
+          position: [0, 20, 35],
+          fov: 75,
+          near: 0.1,
+          far: 1000
+        }}
         style={{ background: '#0a1929' }}
       >
+        <color attach="background" args={['#0a1929']} />
         <ambientLight intensity={0.5} />
         <pointLight position={[10, 10, 10]} intensity={1} />
+        <pointLight position={[-10, -10, -10]} intensity={0.5} />
         <OrbitControls 
           enablePan={true}
           enableZoom={true}
           enableRotate={true}
           minDistance={10}
           maxDistance={50}
+          makeDefault
         />
         <fog attach="fog" args={['#0a1929', 20, 80]} />
         {nodes.map((node, index) => (
