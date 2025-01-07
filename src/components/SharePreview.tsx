@@ -11,14 +11,10 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const visibleCats = Object.entries(categories)
-    .filter(([key]) => {
-      console.log(`Category ${key} visibility:`, visibleCategories[key]);
-      return visibleCategories[key];
-    })
+    .filter(([key]) => visibleCategories[key])
     .sort((a, b) => a[1].title.localeCompare(b[1].title));
 
-  console.log('Visible categories:', visibleCats.map(([key]) => key));
-  console.log('Aurora virtual chain projects:', categories['aurora-virtual-chain']?.projects);
+  console.log('Rendering SharePreview with visible categories:', visibleCats.map(([key]) => key));
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -28,8 +24,6 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
     container.selectAll('.category-card').remove();
 
     console.log('Rendering categories:', visibleCats);
-    console.log('Categories data:', categories);
-    console.log('Visibility state:', visibleCategories);
 
     const width = 3840;
     const height = 2160;
@@ -90,21 +84,19 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
       );
 
       const sanitizeName = (name: string) => {
-        // Split at any character that's not alphanumeric, space, or $
         const parts = name.split(/[^\w\s$]+/);
-        // Get the first part and trim it
         return parts[0].trim();
       };
 
       card.html(`
-        <div class="h-full bg-[#111827] border border-[#1d4ed8] rounded-xl p-4 flex flex-col">
+        <div class="h-full bg-[#111827] border border-[#1d4ed8] rounded-xl p-4 flex flex-col overflow-visible">
           <h2 class="text-xl font-semibold text-[#60a5fa] mb-4 line-clamp-1">
             ${category.title}
           </h2>
-          <div class="grid gap-4" style="grid-template-columns: repeat(auto-fill, minmax(${iconSize + 32}px, 1fr));">
+          <div class="grid gap-4 overflow-visible" style="grid-template-columns: repeat(auto-fill, minmax(${iconSize + 32}px, 1fr));">
             ${visibleProjects.map(project => `
-              <div class="flex flex-col items-center gap-2">
-                <div class="rounded-full bg-gray-800 overflow-hidden flex items-center justify-center"
+              <div class="flex flex-col items-center gap-2 overflow-visible">
+                <div class="rounded-full bg-gray-800 overflow-hidden flex items-center justify-center z-10"
                      style="width: ${iconSize}px; height: ${iconSize}px">
                   <img
                     src="${project.image || '/placeholder.svg'}"
@@ -113,7 +105,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
                     onerror="this.src='/placeholder.svg'"
                   />
                 </div>
-                <span class="text-white text-xs text-center w-full px-1 max-w-[${iconSize + 24}px] line-clamp-2" 
+                <span class="text-white text-xs text-center w-full px-1 max-w-[${iconSize + 24}px] line-clamp-2 z-10" 
                       title="${project.name}">
                   ${sanitizeName(project.name)}
                 </span>
@@ -126,12 +118,12 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
   }, [visibleCats]);
 
   return (
-    <div className="w-[3840px] h-[2160px] bg-[#0A0F1C] text-left relative" ref={containerRef}>
+    <div className="w-[3840px] h-[2160px] bg-[#0A0F1C] text-left relative overflow-visible" ref={containerRef}>
       <h1 className="text-4xl font-bold text-white p-8">
         NEAR Protocol Ecosystem Map
       </h1>
       
-      <div className="grid-container absolute inset-0 pt-[80px] px-[20px] pb-[20px]">
+      <div className="grid-container absolute inset-0 pt-[80px] px-[20px] pb-[20px] overflow-visible">
         {/* D3 will inject content here */}
       </div>
     </div>
