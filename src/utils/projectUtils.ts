@@ -11,7 +11,7 @@ export const categoryColors: { [key: string]: string } = {
   nft: "bg-fuchsia-600",
   other: "bg-gray-600",
   utilities: "bg-slate-600",
-  "aurora-virtual-chain": "bg-amber-600",
+  "aurora virtual chain": "bg-amber-600",
   bitcoin: "bg-orange-600",
   accelerator: "bg-red-600",
   ai: "bg-cyan-600",
@@ -72,7 +72,7 @@ export const categoryColors: { [key: string]: string } = {
 // Define priority categories that should appear first (alphabetically ordered)
 const priorityCategories = [
   'ai',
-  'aurora-virtual-chain',
+  'aurora virtual chain',
   'borrowing-lending',
   'dex',
   'ecosystem-support',
