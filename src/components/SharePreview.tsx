@@ -23,7 +23,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
 
     const width = 1920;
     const height = 1080;
-    const padding = 40;
+    const padding = 20;  // Reduced from 40
     const titleHeight = 60;
 
     // Available space for the grid
@@ -33,7 +33,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
     // Use D3's treemap layout
     const treemap = d3.treemap<any>()
       .size([availableWidth, availableHeight])
-      .padding(16)
+      .padding(12)  // Reduced from 16
       .round(true);
 
     const root = d3.hierarchy({
@@ -65,7 +65,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
       
       const minIconSize = 40;
       const maxIconSize = 60;
-      const padding = 16;
+      const padding = 12;  // Reduced from 16
       
       const maxColumns = Math.floor((cardWidth - padding) / (minIconSize + padding));
       const maxRows = Math.floor((cardHeight - padding - 40) / (minIconSize + padding + 20));
@@ -80,11 +80,11 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
       );
 
       card.html(`
-        <div class="h-full bg-[#111827] border border-[#1d4ed8] rounded-xl p-4 flex flex-col">
-          <h2 class="text-lg font-semibold text-[#60a5fa] mb-3 truncate">
+        <div class="h-full bg-[#111827] border border-[#1d4ed8] rounded-xl p-3 flex flex-col">
+          <h2 class="text-lg font-semibold text-[#60a5fa] mb-2 truncate">
             ${category.title}
           </h2>
-          <div class="grid gap-3 flex-1" style="grid-template-columns: repeat(auto-fill, minmax(${iconSize}px, 1fr)); align-content: start">
+          <div class="grid gap-2 flex-1" style="grid-template-columns: repeat(auto-fill, minmax(${iconSize}px, 1fr)); align-content: start">
             ${visibleProjects.map(project => `
               <div class="flex flex-col items-center gap-1">
                 <div class="rounded-full bg-gray-800 overflow-hidden flex items-center justify-center"
@@ -109,11 +109,11 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
 
   return (
     <div className="w-[1920px] h-[1080px] bg-[#0A0F1C] text-left relative" ref={containerRef}>
-      <h1 className="text-2xl font-bold text-white p-10">
+      <h1 className="text-2xl font-bold text-white p-8">
         NEAR Protocol Ecosystem Map
       </h1>
       
-      <div className="grid-container absolute inset-0 pt-[60px] px-[60px] pb-[60px] h-[calc(100%-120px)]">
+      <div className="grid-container absolute inset-0 pt-[60px] px-[20px] pb-[20px] h-[calc(100%-80px)]">
         {/* D3 will inject content here */}
       </div>
     </div>
