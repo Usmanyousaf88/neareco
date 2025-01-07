@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Canvas as FabricCanvas, Rect, Text, Image } from 'fabric';
+import { Canvas as FabricCanvas, Rect, Text, Image, Shadow } from 'fabric';
 import { CategorizedProjects } from '@/types/projects';
 
 interface SharePreviewProps {
@@ -92,7 +92,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
           fill: category.color || '#1a2e3b',
           rx: 12,
           ry: 12,
-          shadow: new fabric.Shadow({
+          shadow: new Shadow({
             color: 'rgba(0,0,0,0.3)',
             blur: 10,
             offsetX: 0,
@@ -101,7 +101,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
         });
 
         // Load and add project image
-        fabric.Image.fromURL(project.imageUrl, (img) => {
+        Image.fromURL(project.imageUrl, (img) => {
           img.scaleToWidth(project.width);
           const scaledHeight = img.getScaledHeight();
           if (scaledHeight > project.height * 0.6) {
@@ -111,7 +111,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
           img.set({
             left: currentX,
             top: currentY,
-            clipPath: new fabric.Rect({
+            clipPath: new Rect({
               width: project.width,
               height: project.height * 0.6,
               rx: 12,
