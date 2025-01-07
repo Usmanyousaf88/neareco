@@ -15,6 +15,12 @@ interface CategoryCardProps {
   isPriority?: boolean;
 }
 
+const truncateProjectName = (name: string): string => {
+  // Split on special characters and take the first part
+  const truncated = name.split(/[^a-zA-Z0-9\s$]/, 1)[0].trim();
+  return truncated || name; // Fallback to original name if truncation results in empty string
+};
+
 const CategoryCard = ({ title, color, projects, onClick, isPriority = false }: CategoryCardProps) => {
   return (
     <motion.div
@@ -58,7 +64,9 @@ const CategoryCard = ({ title, color, projects, onClick, isPriority = false }: C
               alt={project.name}
               className="w-12 h-12 rounded-full mb-2 bg-white p-1"
             />
-            <span className="text-sm text-center line-clamp-2">{project.name}</span>
+            <span className="text-sm text-center line-clamp-2">
+              {truncateProjectName(project.name)}
+            </span>
           </motion.div>
         ))}
       </motion.div>
