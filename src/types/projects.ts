@@ -1,29 +1,31 @@
 export interface Project {
-  slug: string;
-  profile: {
-    name: string;
-    tagline: string;
-    image: {
-      url: string;
-    };
-    tags: {
-      [key: string]: string;
-    };
-  };
+  name: string;
+  image: string;
+  tagline: string;
 }
 
-export interface ProjectsResponse {
-  [key: string]: Project;
+export interface Category {
+  title: string;
+  color: string;
+  projects: Project[];
+  isPriority: boolean;
 }
 
 export interface CategorizedProjects {
+  [key: string]: Category;
+}
+
+export interface ProjectsResponse {
   [key: string]: {
-    title: string;
-    color: string;
-    projects: Array<{
+    profile: {
       name: string;
-      image: string;
+      image: {
+        url: string;
+      };
       tagline: string;
-    }>;
+      tags: {
+        [key: string]: string;
+      };
+    };
   };
 }

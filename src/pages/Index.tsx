@@ -92,6 +92,11 @@ const Index = () => {
     );
   }
 
+  // Sort categories alphabetically by title
+  const sortedCategories = Object.entries(categorizedProjects).sort((a, b) => 
+    a[1].title.localeCompare(b[1].title)
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white p-8">
       <div className="max-w-[1800px] mx-auto">
@@ -109,7 +114,7 @@ const Index = () => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
-          {Object.entries(categorizedProjects).map(([key, category]) => (
+          {sortedCategories.map(([key, category]) => (
             <motion.div 
               key={key} 
               className="flex items-center space-x-2"
