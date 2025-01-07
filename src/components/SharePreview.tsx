@@ -21,10 +21,10 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
     const container = d3.select(containerRef.current);
     container.selectAll('.category-card').remove();
 
-    const width = 1920;
-    const height = 1080;
-    const padding = 20;
-    const titleHeight = 60;
+    const width = 1600; // Reduced from 1920
+    const height = 900; // Reduced from 1080
+    const padding = 10; // Reduced from 20
+    const titleHeight = 40; // Reduced from 60
 
     // Available space for the grid
     const availableWidth = width - (padding * 2);
@@ -33,7 +33,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
     // Use D3's treemap layout
     const treemap = d3.treemap<any>()
       .size([availableWidth, availableHeight])
-      .padding(12)
+      .padding(8) // Reduced from 12
       .round(true);
 
     const root = d3.hierarchy({
@@ -63,28 +63,28 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
       const cardHeight = d.y1 - d.y0;
       const category = d.data.category;
       
-      const minIconSize = 40;
-      const maxIconSize = 60;
-      const padding = 12;
+      const minIconSize = 36; // Reduced from 40
+      const maxIconSize = 48; // Reduced from 60
+      const padding = 8; // Reduced from 12
       
       const maxColumns = Math.floor((cardWidth - padding) / (minIconSize + padding));
-      const maxRows = Math.floor((cardHeight - padding - 40) / (minIconSize + padding + 20));
+      const maxRows = Math.floor((cardHeight - padding - 30) / (minIconSize + padding + 16));
       
       const maxProjects = maxColumns * maxRows;
       const visibleProjects = category.projects.slice(0, maxProjects);
       
       const iconSize = Math.min(
         Math.floor((cardWidth - padding * (maxColumns + 1)) / maxColumns),
-        Math.floor((cardHeight - padding * (maxRows + 1) - 40) / maxRows),
+        Math.floor((cardHeight - padding * (maxRows + 1) - 30) / maxRows),
         maxIconSize
       );
 
       card.html(`
-        <div class="h-full bg-[#111827] border border-[#1d4ed8] rounded-xl p-3 flex flex-col">
-          <h2 class="text-lg font-semibold text-[#60a5fa] mb-2 truncate">
+        <div class="h-full bg-[#111827] border border-[#1d4ed8] rounded-xl p-2 flex flex-col">
+          <h2 class="text-base font-semibold text-[#60a5fa] mb-1 truncate">
             ${category.title}
           </h2>
-          <div class="grid gap-2 flex-1" style="grid-template-columns: repeat(auto-fill, minmax(${iconSize}px, 1fr)); align-content: start">
+          <div class="grid gap-1 flex-1" style="grid-template-columns: repeat(auto-fill, minmax(${iconSize}px, 1fr)); align-content: start">
             ${visibleProjects.map(project => `
               <div class="flex flex-col items-center gap-1">
                 <div class="rounded-full bg-gray-800 overflow-hidden flex items-center justify-center"
@@ -96,7 +96,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
                     onerror="this.src='/placeholder.svg'"
                   />
                 </div>
-                <span class="text-white text-xs truncate text-center w-full px-1" title="${project.name}">
+                <span class="text-white text-[10px] truncate text-center w-full px-1" title="${project.name}">
                   ${project.name}
                 </span>
               </div>
@@ -108,12 +108,12 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
   }, [visibleCats]);
 
   return (
-    <div className="w-[1920px] h-[1080px] bg-[#0A0F1C] text-left relative" ref={containerRef}>
-      <h1 className="text-2xl font-bold text-white p-8">
+    <div className="w-[1600px] h-[900px] bg-[#0A0F1C] text-left relative" ref={containerRef}>
+      <h1 className="text-xl font-bold text-white p-4">
         NEAR Protocol Ecosystem Map
       </h1>
       
-      <div className="grid-container absolute inset-0 pt-[60px] px-[20px] pb-[20px]">
+      <div className="grid-container absolute inset-0 pt-[40px] px-[10px] pb-[10px]">
         {/* D3 will inject content here */}
       </div>
     </div>
