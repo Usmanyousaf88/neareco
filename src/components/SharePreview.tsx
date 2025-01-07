@@ -87,7 +87,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
           </h2>
           <div class="grid gap-4" style="grid-template-columns: repeat(auto-fill, minmax(${iconSize + 32}px, 1fr));">
             ${visibleProjects.map(project => `
-              <div class="flex flex-col items-center gap-2">
+              <div class="flex flex-col items-center min-h-[120px]">
                 <div class="rounded-full bg-gray-800 overflow-hidden flex items-center justify-center"
                      style="width: ${iconSize}px; height: ${iconSize}px">
                   <img
@@ -97,9 +97,12 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
                     onerror="this.src='/placeholder.svg'"
                   />
                 </div>
-                <span class="text-white text-xs text-center w-full px-1 max-w-[${iconSize + 24}px] line-clamp-2" title="${project.name}">
-                  ${project.name}
-                </span>
+                <span class="text-sm text-center font-medium text-white">${project.name}</span>
+                ${project.tagline ? `
+                  <span class="text-xs text-gray-400 text-center mt-1 line-clamp-2">
+                    ${project.tagline}
+                  </span>
+                ` : ''}
               </div>
             `).join('')}
           </div>
