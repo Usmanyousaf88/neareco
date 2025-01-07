@@ -8,6 +8,7 @@ import { categorizeProjects } from '@/utils/projectUtils';
 import type { ProjectsResponse } from '@/types/projects';
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from 'framer-motion';
 
 const fetchProjects = async (): Promise<ProjectsResponse> => {
@@ -73,6 +74,18 @@ const Index = () => {
     }));
   };
 
+  const toggleAllCategories = () => {
+    const areAllChecked = Object.values(visibleCategories).every(value => value);
+    const newValue = !areAllChecked;
+    
+    const updatedVisibility = Object.keys(visibleCategories).reduce((acc, category) => {
+      acc[category] = newValue;
+      return acc;
+    }, {} as Record<string, boolean>);
+    
+    setVisibleCategories(updatedVisibility);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white flex items-center justify-center">
@@ -97,6 +110,8 @@ const Index = () => {
     a[1].title.localeCompare(b[1].title)
   );
 
+  const areAllChecked = Object.values(visibleCategories).every(value => value);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white p-8">
       <div className="max-w-[1800px] mx-auto">
@@ -114,26 +129,37 @@ const Index = () => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
-          {sortedCategories.map(([key, category]) => (
-            <motion.div 
-              key={key} 
-              className="flex items-center space-x-2"
-              layout
-            >
-              <Checkbox
-                id={`category-${key}`}
-                checked={visibleCategories[key]}
-                onCheckedChange={() => toggleCategory(key)}
-                className="border-white data-[state=checked]:bg-white data-[state=checked]:text-black"
-              />
-              <Label
-                htmlFor={`category-${key}`}
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-white"
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={toggleAllCategories}
+            className="mb-4"
+          >
+            {areAllChecked ? 'Uncheck All' : 'Check All'}
+          </Button>
+          
+          <div className="w-full flex flex-wrap gap-4 justify-center">
+            {sortedCategories.map(([key, category]) => (
+              <motion.div 
+                key={key} 
+                className="flex items-center space-x-2"
+                layout
               >
-                {category.title}
-              </Label>
-            </motion.div>
-          ))}
+                <Checkbox
+                  id={`category-${key}`}
+                  checked={visibleCategories[key]}
+                  onCheckedChange={() => toggleCategory(key)}
+                  className="border-white data-[state=checked]:bg-white data-[state=checked]:text-black"
+                />
+                <Label
+                  htmlFor={`category-${key}`}
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-white"
+                >
+                  {category.title}
+                </Label>
+              </motion.div>
+            ))}
+          </div>
         </motion.div>
 
         <AnimatePresence>
