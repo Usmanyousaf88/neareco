@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from '@tanstack/react-query';
+import CategoryCard from '@/components/CategoryCard';
+import ProjectsGrid from '@/components/ProjectsGrid';
 
 interface Project {
   slug: string;
@@ -147,16 +148,6 @@ const Index = () => {
     }
   };
 
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    const img = e.target as HTMLImageElement;
-    img.src = "/placeholder.svg";
-    toast({
-      title: "Image Load Error",
-      description: "Failed to load project image. Using placeholder instead.",
-      variant: "destructive",
-    });
-  };
-
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white flex items-center justify-center">
@@ -181,58 +172,23 @@ const Index = () => {
       <div className="max-w-7xl mx-auto">
         <h1 className="text-4xl font-bold mb-8 text-center">NEAR Protocol Ecosystem Map</h1>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-min">
           {Object.entries(categorizedProjects).map(([key, category]) => (
-            <motion.div
+            <CategoryCard
               key={key}
-              className={`${category.color} rounded-lg p-6 cursor-pointer transform transition-all duration-300 hover:scale-105`}
-              whileHover={{ y: -5 }}
+              title={category.title}
+              color={category.color}
+              projects={category.projects}
               onClick={() => handleCategoryClick(key)}
-            >
-              <h2 className="text-2xl font-bold mb-4">{category.title}</h2>
-              <div className="grid grid-cols-2 gap-4">
-                {category.projects.slice(0, 4).map((project) => (
-                  <div key={project.name} className="flex flex-col items-center">
-                    <img
-                      src={project.image}
-                      alt={project.name}
-                      className="w-12 h-12 rounded-full mb-2 bg-white p-1"
-                      onError={handleImageError}
-                    />
-                    <span className="text-sm text-center">{project.name}</span>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
+            />
           ))}
         </div>
 
         {selectedCategory && categorizedProjects[selectedCategory] && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-8 bg-gray-800 rounded-lg p-6"
-          >
-            <h3 className="text-2xl font-bold mb-4">
-              {categorizedProjects[selectedCategory].title} Projects
-            </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {categorizedProjects[selectedCategory].projects.map((project) => (
-                <div key={project.name} className="flex flex-col items-center">
-                  <img
-                    src={project.image}
-                    alt={project.name}
-                    className="w-16 h-16 rounded-full mb-2 bg-white p-1"
-                    onError={handleImageError}
-                  />
-                  <span className="text-sm text-center">{project.name}</span>
-                  {project.tagline && (
-                    <span className="text-xs text-gray-400 text-center mt-1">{project.tagline}</span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </motion.div>
+          <ProjectsGrid
+            title={categorizedProjects[selectedCategory].title}
+            projects={categorizedProjects[selectedCategory].projects}
+          />
         )}
       </div>
     </div>
