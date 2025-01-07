@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { fabric } from 'fabric';
+import { Canvas as FabricCanvas, Circle, Line, Text } from 'fabric';
 import { CategorizedProjects } from '@/types/projects';
 
 interface SharePreviewProps {
@@ -9,13 +9,13 @@ interface SharePreviewProps {
 
 const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const fabricCanvasRef = useRef<fabric.Canvas | null>(null);
+  const fabricCanvasRef = useRef<FabricCanvas | null>(null);
 
   useEffect(() => {
     if (!canvasRef.current) return;
 
     // Initialize Fabric canvas
-    const canvas = new fabric.Canvas(canvasRef.current, {
+    const canvas = new FabricCanvas(canvasRef.current, {
       width: 800,
       height: 600,
       backgroundColor: '#0a1929'
@@ -24,21 +24,21 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
     fabricCanvasRef.current = canvas;
 
     // Draw visible categories and their projects
-    const visibleCategories = Object.entries(categories)
+    const visibleCats = Object.entries(categories)
       .filter(([key]) => visibleCategories[key]);
 
-    const centerX = canvas.width! / 2;
-    const centerY = canvas.height! / 2;
-    const radius = Math.min(canvas.width!, canvas.height!) * 0.35;
+    const centerX = canvas.getWidth() / 2;
+    const centerY = canvas.getHeight() / 2;
+    const radius = Math.min(canvas.getWidth(), canvas.getHeight()) * 0.35;
 
     // Draw categories in a circle
-    visibleCategories.forEach(([key, category], index) => {
-      const angle = (index * 2 * Math.PI) / visibleCategories.length;
+    visibleCats.forEach(([key, category], index) => {
+      const angle = (index * 2 * Math.PI) / visibleCats.length;
       const x = centerX + radius * Math.cos(angle);
       const y = centerY + radius * Math.sin(angle);
 
       // Draw category circle
-      const categoryCircle = new fabric.Circle({
+      const categoryCircle = new Circle({
         left: x - 30,
         top: y - 30,
         radius: 30,
@@ -48,7 +48,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
       });
 
       // Add category label
-      const categoryText = new fabric.Text(category.title, {
+      const categoryText = new Text(category.title, {
         left: x - 40,
         top: y + 35,
         fontSize: 14,
@@ -66,7 +66,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
         const projectX = x + projectRadius * Math.cos(projectAngle);
         const projectY = y + projectRadius * Math.sin(projectAngle);
 
-        const projectCircle = new fabric.Circle({
+        const projectCircle = new Circle({
           left: projectX - 15,
           top: projectY - 15,
           radius: 15,
@@ -76,7 +76,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
           strokeWidth: 1
         });
 
-        const projectText = new fabric.Text(project.name, {
+        const projectText = new Text(project.name, {
           left: projectX - 30,
           top: projectY + 20,
           fontSize: 12,
@@ -88,7 +88,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
         canvas.add(projectCircle, projectText);
 
         // Draw line connecting project to category
-        const line = new fabric.Line([x, y, projectX, projectY], {
+        const line = new Line([x, y, projectX, projectY], {
           stroke: '#ffffff',
           strokeWidth: 1,
           opacity: 0.3
