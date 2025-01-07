@@ -25,11 +25,10 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
     const height = 1080;
     const padding = 40;
     const titleHeight = 60;
-    const footerHeight = 30;
 
     // Available space for the grid
     const availableWidth = width - (padding * 2);
-    const availableHeight = height - titleHeight - footerHeight - (padding * 2);
+    const availableHeight = height - titleHeight - (padding * 2);
 
     // Use D3's treemap layout
     const treemap = d3.treemap<any>()
@@ -110,16 +109,12 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
 
   return (
     <div className="w-[1920px] h-[1080px] bg-[#0A0F1C] text-left relative" ref={containerRef}>
-      <h1 className="text-2xl font-bold text-white p-8 pb-4">
+      <h1 className="text-2xl font-bold text-white p-10">
         NEAR Protocol Ecosystem Map
       </h1>
       
-      <div className="grid-container absolute inset-0 pt-[60px] pb-[30px] px-[40px] h-[calc(100%-90px)]">
+      <div className="grid-container absolute inset-0 pt-[60px] px-[60px] pb-[60px] h-[calc(100%-120px)]">
         {/* D3 will inject content here */}
-      </div>
-
-      <div className="absolute bottom-4 right-8 text-gray-500 text-sm">
-        Updated: {new Date().toLocaleDateString()}
       </div>
     </div>
   );
