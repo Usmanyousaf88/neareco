@@ -6,14 +6,12 @@ import ProjectsGrid from '@/components/ProjectsGrid';
 import MasonryLayout from '@/components/MasonryLayout';
 import { categorizeProjects } from '@/utils/projectUtils';
 import { fetchProjects } from '@/utils/api';
-import type { ProjectsResponse } from '@/types/projects';
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from 'framer-motion';
-import html2canvas from 'html2canvas';
 import { Share2, Star } from 'lucide-react';
-import SharePreview from '@/components/SharePreview';
+import ShareDialog from '@/components/ShareDialog';
 
 const breakpointColumns = {
   default: 5,
@@ -27,6 +25,7 @@ const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [visibleCategories, setVisibleCategories] = useState<Record<string, boolean>>({});
   const [showOnlyFeatured, setShowOnlyFeatured] = useState(true);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const { toast } = useToast();
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -61,53 +60,6 @@ const Index = () => {
 
   const handleCategoryClick = (categoryKey: string) => {
     setSelectedCategory(categoryKey);
-  };
-
-  const handleShare = async () => {
-    try {
-      toast({
-        title: "Generating image...",
-        description: "Please wait while we create your share image.",
-      });
-
-      const element = document.getElementById('share-preview');
-      if (!element) {
-        throw new Error('Share preview element not found');
-      }
-
-      const canvas = await html2canvas(element, {
-        width: 3840,
-        height: 2160,
-        scale: 1,
-        backgroundColor: null,
-        logging: true,
-        onclone: (clonedDoc) => {
-          const clonedElement = clonedDoc.getElementById('share-preview');
-          if (clonedElement) {
-            clonedElement.style.width = '3840px';
-            clonedElement.style.height = '2160px';
-          }
-        }
-      });
-
-      const image = canvas.toDataURL('image/png');
-      const link = document.createElement('a');
-      link.download = 'near-ecosystem-map.png';
-      link.href = image;
-      link.click();
-
-      toast({
-        title: "Success!",
-        description: "Your image has been generated and downloaded.",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to generate share image. Please try again.",
-        variant: "destructive",
-      });
-      console.error("Error generating share image:", error);
-    }
   };
 
   const toggleCategory = (category: string) => {
@@ -213,7 +165,7 @@ const Index = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={handleShare}
+              onClick={() => setShareDialogOpen(true)}
               className="mb-4 bg-white/5 text-white hover:bg-white/10 hover:text-white border-white/20"
             >
               <Share2 className="w-4 h-4 mr-2" />
@@ -246,10 +198,13 @@ const Index = () => {
         </motion.div>
 
         <div ref={contentRef}>
-          <SharePreview 
+          <ShareDialog 
+            open={shareDialogOpen}
+            onOpenChange={setShareDialogOpen}
             categories={categorizedProjects} 
             visibleCategories={visibleCategories}
           />
+          
           <AnimatePresence>
             <MasonryLayout breakpointColumns={breakpointColumns}>
               {Object.entries(categorizedProjects)
