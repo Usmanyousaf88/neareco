@@ -80,8 +80,10 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
       );
 
       const sanitizeName = (name: string) => {
-        // Replace special characters with spaces and trim
-        return name.replace(/[^\w\s-]/g, ' ').trim();
+        // Split at any character that's not alphanumeric, space, or $
+        const parts = name.split(/[^\w\s$]+/);
+        // Get the first part and trim it
+        return parts[0].trim();
       };
 
       card.html(`
@@ -102,7 +104,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
                   />
                 </div>
                 <span class="text-white text-xs text-center w-full px-1 max-w-[${iconSize + 24}px] line-clamp-2" 
-                      title="${sanitizeName(project.name)}">
+                      title="${project.name}">
                   ${sanitizeName(project.name)}
                 </span>
               </div>
