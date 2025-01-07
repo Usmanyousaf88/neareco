@@ -56,6 +56,10 @@ const Index = () => {
     }
   }, [projectsData]);
 
+  const handleCategoryClick = (categoryKey: string) => {
+    setSelectedCategory(categoryKey);
+  };
+
   const handleShare = async () => {
     if (!contentRef.current) return;
 
@@ -174,7 +178,7 @@ const Index = () => {
               variant="outline"
               size="sm"
               onClick={toggleAllCategories}
-              className="mb-4 text-white hover:text-white border-white/20"
+              className="mb-4 bg-white/5 text-white hover:bg-white/10 hover:text-white border-white/20"
             >
               {areAllChecked ? 'Uncheck All' : 'Check All'}
             </Button>
@@ -183,7 +187,7 @@ const Index = () => {
               variant="outline"
               size="sm"
               onClick={handleShare}
-              className="mb-4 text-white hover:text-white border-white/20"
+              className="mb-4 bg-white/5 text-white hover:bg-white/10 hover:text-white border-white/20"
             >
               <Share2 className="w-4 h-4 mr-2" />
               Share
@@ -212,6 +216,7 @@ const Index = () => {
               </motion.div>
             ))}
           </div>
+
         </motion.div>
 
         <div ref={contentRef}>
