@@ -68,15 +68,15 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
       const padding = 24;
       
       // Calculate grid dimensions with more space for text
-      const maxColumns = Math.floor((cardWidth - padding * 2) / (minIconSize + padding + 64));
-      const maxRows = Math.floor((cardHeight - padding * 2 - 80) / (minIconSize + padding + 48));
+      const maxColumns = Math.floor((cardWidth - padding * 2) / (minIconSize + padding + 48));
+      const maxRows = Math.floor((cardHeight - padding * 2 - 80) / (minIconSize + padding + 32));
       
       const maxProjects = maxColumns * maxRows;
       const visibleProjects = category.projects.slice(0, maxProjects);
       
       const iconSize = Math.min(
-        Math.floor((cardWidth - padding * (maxColumns + 1)) / maxColumns),
-        Math.floor((cardHeight - padding * (maxRows + 1) - 80) / maxRows),
+        Math.floor((cardWidth - padding * (maxColumns + 1)) / maxColumns) - 48,
+        Math.floor((cardHeight - padding * (maxRows + 1) - 80) / maxRows) - 32,
         maxIconSize
       );
 
@@ -85,9 +85,9 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
           <h2 class="text-2xl font-semibold text-[#60a5fa] mb-6 line-clamp-1">
             ${category.title}
           </h2>
-          <div class="grid gap-8" style="grid-template-columns: repeat(auto-fill, minmax(${iconSize + 64}px, 1fr)); align-content: start">
+          <div class="grid gap-6" style="grid-template-columns: repeat(auto-fill, minmax(${iconSize + 48}px, 1fr));">
             ${visibleProjects.map(project => `
-              <div class="flex flex-col items-center gap-4">
+              <div class="flex flex-col items-center gap-3">
                 <div class="rounded-full bg-gray-800 overflow-hidden flex items-center justify-center"
                      style="width: ${iconSize}px; height: ${iconSize}px">
                   <img
@@ -97,7 +97,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
                     onerror="this.src='/placeholder.svg'"
                   />
                 </div>
-                <span class="text-white text-base text-center w-full px-2 max-w-[240px] break-words line-clamp-2" title="${project.name}">
+                <span class="text-white text-sm text-center w-full px-2 max-w-[${iconSize + 32}px] line-clamp-2" title="${project.name}">
                   ${project.name}
                 </span>
               </div>
