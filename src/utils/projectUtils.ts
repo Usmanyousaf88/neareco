@@ -91,8 +91,7 @@ export const categorizeProjects = (projectsData: ProjectsResponse): CategorizedP
   const tagCounts = new Map<string, number>();
   Object.values(projectsData).forEach((project) => {
     Object.entries(project.profile.tags).forEach(([tag]) => {
-      const normalizedTag = tag.toLowerCase().trim().replace(/[\s-]+/g, '-');
-      tagCounts.set(normalizedTag, (tagCounts.get(normalizedTag) || 0) + 1);
+      tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
     });
   });
 
@@ -104,27 +103,22 @@ export const categorizeProjects = (projectsData: ProjectsResponse): CategorizedP
   // Distribute projects across categories
   sortedProjects.forEach(([projectId, project]) => {
     Object.entries(project.profile.tags).forEach(([tag, value]) => {
-      // Normalize tag consistently for both the key and when checking existence
-      const normalizedTag = tag.toLowerCase().trim().replace(/[\s-]+/g, '-');
-      
-      // Add console logs to debug tag normalization
-      console.log('Original tag:', tag);
-      console.log('Normalized tag:', normalizedTag);
+      console.log('Tag:', tag);
       console.log('Project:', project.profile.name);
       
-      if (!categories[normalizedTag]) {
-        categories[normalizedTag] = {
+      if (!categories[tag]) {
+        categories[tag] = {
           title: value,
-          color: categoryColors[normalizedTag] || "bg-gray-500",
+          color: categoryColors[tag] || "bg-gray-500",
           projects: [],
-          isPriority: priorityCategories.includes(normalizedTag)
+          isPriority: priorityCategories.includes(tag)
         };
       }
       
       // Only add the project if it's not already in the category
-      const existingProject = categories[normalizedTag].projects.find(p => p.name === project.profile.name);
+      const existingProject = categories[tag].projects.find(p => p.name === project.profile.name);
       if (!existingProject) {
-        categories[normalizedTag].projects.push({
+        categories[tag].projects.push({
           name: project.profile.name,
           image: project.profile.image.url,
           tagline: project.profile.tagline
