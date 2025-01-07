@@ -246,7 +246,10 @@ const Index = () => {
         </motion.div>
 
         <div ref={contentRef}>
-          <SharePreview categories={categorizedProjects} />
+          <SharePreview 
+            categories={categorizedProjects} 
+            visibleCategories={visibleCategories}
+          />
           <AnimatePresence>
             <MasonryLayout breakpointColumns={breakpointColumns}>
               {Object.entries(categorizedProjects)

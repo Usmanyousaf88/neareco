@@ -4,9 +4,10 @@ import { CategorizedProjects } from '@/types/projects';
 
 interface SharePreviewProps {
   categories: CategorizedProjects;
+  visibleCategories: Record<string, boolean>;
 }
 
-const SharePreview = ({ categories }: SharePreviewProps) => {
+const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
   const svgRef = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
@@ -27,8 +28,10 @@ const SharePreview = ({ categories }: SharePreviewProps) => {
       .attr("viewBox", `0 0 ${width} ${height}`)
       .style("background", "rgb(17, 24, 39)");
 
-    // Create sections layout
-    const sections = Object.entries(categories);
+    // Filter visible sections and create layout
+    const sections = Object.entries(categories)
+      .filter(([key]) => visibleCategories[key]);
+      
     const numColumns = 3;
     const numRows = Math.ceil(sections.length / numColumns);
     
@@ -92,14 +95,29 @@ const SharePreview = ({ categories }: SharePreviewProps) => {
           .attr("fill", "white")
           .attr("opacity", 0.1);
 
-        // Project icon
-        projectGroup.append("image")
-          .attr("x", projectSize * 0.15)
-          .attr("y", projectSize * 0.15)
+        // Project icon - using pattern to ensure image displays correctly
+        const patternId = `pattern-${key}-${projectIndex}`;
+        
+        // Define pattern for image
+        const defs = svg.append("defs");
+        const pattern = defs.append("pattern")
+          .attr("id", patternId)
+          .attr("width", 1)
+          .attr("height", 1)
+          .attr("patternUnits", "objectBoundingBox");
+
+        pattern.append("image")
           .attr("width", projectSize * 0.7)
           .attr("height", projectSize * 0.7)
           .attr("href", project.image)
           .attr("preserveAspectRatio", "xMidYMid meet");
+
+        // Project icon circle with pattern fill
+        projectGroup.append("circle")
+          .attr("r", projectSize * 0.35)
+          .attr("cx", projectSize / 2)
+          .attr("cy", projectSize / 2)
+          .attr("fill", `url(#${patternId})`);
 
         // Project name
         projectGroup.append("text")
@@ -122,7 +140,7 @@ const SharePreview = ({ categories }: SharePreviewProps) => {
       .attr("font-weight", "bold")
       .text("NEAR Protocol Ecosystem Map");
 
-  }, [categories]);
+  }, [categories, visibleCategories]);
 
   return (
     <div className="fixed left-[-9999px] top-[-9999px]" id="share-preview">
