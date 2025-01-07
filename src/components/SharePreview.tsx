@@ -27,16 +27,16 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
 
     const width = 3840;
     const height = 2160;
-    const padding = 32;
+    const padding = 24;
     const titleHeight = 80;
-    const minCategoryWidth = 480; // Slightly smaller minimum width
-    const minCategoryHeight = 320; // Slightly smaller minimum height
+    const minCategoryWidth = 400;
+    const minCategoryHeight = 280;
 
     // Available space for the grid
     const availableWidth = width - (padding * 2);
     const availableHeight = height - titleHeight - (padding * 2);
 
-    // Calculate optimal grid layout with golden ratio influence
+    // Calculate optimal grid layout
     const totalCategories = visibleCats.length;
     const goldenRatio = 1.618;
     const aspectRatio = availableWidth / availableHeight;
@@ -44,11 +44,11 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
     const cols = Math.max(1, Math.round(idealCols));
     const rows = Math.ceil(totalCategories / cols);
 
-    // Calculate cell dimensions with more dynamic spacing
+    // Calculate cell dimensions
     const cellWidth = Math.max(minCategoryWidth, Math.floor(availableWidth / cols) - padding);
     const cellHeight = Math.max(minCategoryHeight, Math.floor(availableHeight / rows) - padding);
 
-    // Create grid layout with improved spacing
+    // Create grid layout
     visibleCats.forEach(([key, category], index) => {
       const row = Math.floor(index / cols);
       const col = index % cols;
@@ -62,19 +62,19 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
         .style('width', `${cellWidth}px`)
         .style('height', `${cellHeight}px`);
 
-      const minIconSize = 56; // Slightly smaller icons
-      const maxIconSize = 72;
-      const cardPadding = 24;
+      const minIconSize = 48;
+      const maxIconSize = 64;
+      const cardPadding = 20;
       
-      const maxColumns = Math.floor((cellWidth - cardPadding * 2) / (minIconSize + cardPadding));
-      const maxRows = Math.floor((cellHeight - cardPadding * 2 - 48) / (minIconSize + cardPadding));
+      const maxColumns = Math.floor((cellWidth - cardPadding * 2) / (minIconSize + 8));
+      const maxRows = Math.floor((cellHeight - cardPadding * 2 - 40) / (minIconSize + 24));
       
       const maxProjects = maxColumns * maxRows;
       const visibleProjects = category.projects.slice(0, maxProjects);
       
       const iconSize = Math.min(
-        Math.floor((cellWidth - cardPadding * (maxColumns + 1)) / maxColumns) - 16,
-        Math.floor((cellHeight - cardPadding * (maxRows + 1) - 48) / maxRows) - 16,
+        Math.floor((cellWidth - cardPadding * (maxColumns + 1)) / maxColumns),
+        Math.floor((cellHeight - cardPadding * (maxRows + 1) - 40) / maxRows),
         maxIconSize
       );
 
@@ -84,13 +84,13 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
       };
 
       card.html(`
-        <div class="h-full bg-[#111827] border border-[#1d4ed8]/30 rounded-xl p-6 flex flex-col overflow-visible shadow-lg">
-          <h2 class="text-2xl font-semibold text-[#60a5fa] mb-6 line-clamp-1">
+        <div class="h-full bg-[#111827] border border-[#1d4ed8]/30 rounded-xl p-5 flex flex-col overflow-visible shadow-lg">
+          <h2 class="text-xl font-semibold text-[#60a5fa] mb-4 line-clamp-1">
             ${category.title}
           </h2>
-          <div class="grid gap-6 overflow-visible" style="grid-template-columns: repeat(auto-fill, minmax(${iconSize + 24}px, 1fr));">
+          <div class="grid gap-4 overflow-visible" style="grid-template-columns: repeat(auto-fill, minmax(${iconSize}px, 1fr));">
             ${visibleProjects.map(project => `
-              <div class="flex flex-col items-center gap-3 overflow-visible">
+              <div class="flex flex-col items-center gap-2 overflow-visible">
                 <div class="rounded-full bg-gray-800/50 overflow-hidden flex items-center justify-center z-10 backdrop-blur-sm shadow-lg"
                      style="width: ${iconSize}px; height: ${iconSize}px">
                   <img
@@ -100,7 +100,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
                     onerror="this.src='/placeholder.svg'"
                   />
                 </div>
-                <span class="text-white/90 text-xs text-center w-full px-1 max-w-[${iconSize + 16}px] line-clamp-2 z-10" 
+                <span class="text-white/90 text-xs text-center w-full px-1 max-w-[${iconSize + 8}px] line-clamp-2 z-10" 
                       title="${project.name}">
                   ${sanitizeName(project.name)}
                 </span>
