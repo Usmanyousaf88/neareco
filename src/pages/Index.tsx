@@ -8,6 +8,7 @@ import { categorizeProjects } from '@/utils/projectUtils';
 import type { ProjectsResponse } from '@/types/projects';
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { motion, AnimatePresence } from 'framer-motion';
 
 const fetchProjects = async (): Promise<ProjectsResponse> => {
   const response = await fetch('https://api.nearcatalog.xyz/projects');
@@ -94,11 +95,26 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white p-8">
       <div className="max-w-[1800px] mx-auto">
-        <h1 className="text-4xl font-bold mb-8 text-center">NEAR Protocol Ecosystem Map</h1>
+        <motion.h1 
+          className="text-4xl font-bold mb-8 text-center"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          NEAR Protocol Ecosystem Map
+        </motion.h1>
         
-        <div className="flex flex-wrap gap-4 mb-8 justify-center">
+        <motion.div 
+          className="flex flex-wrap gap-4 mb-8 justify-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
           {Object.entries(categorizedProjects).map(([key, category]) => (
-            <div key={key} className="flex items-center space-x-2">
+            <motion.div 
+              key={key} 
+              className="flex items-center space-x-2"
+              layout
+            >
               <Checkbox
                 id={`category-${key}`}
                 checked={visibleCategories[key]}
@@ -111,23 +127,25 @@ const Index = () => {
               >
                 {category.title}
               </Label>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
 
-        <MasonryLayout breakpointColumns={breakpointColumns}>
-          {Object.entries(categorizedProjects)
-            .filter(([key]) => visibleCategories[key])
-            .map(([key, category]) => (
-              <CategoryCard
-                key={key}
-                title={category.title}
-                color={category.color}
-                projects={category.projects}
-                onClick={() => handleCategoryClick(key)}
-              />
-            ))}
-        </MasonryLayout>
+        <AnimatePresence>
+          <MasonryLayout breakpointColumns={breakpointColumns}>
+            {Object.entries(categorizedProjects)
+              .filter(([key]) => visibleCategories[key])
+              .map(([key, category]) => (
+                <CategoryCard
+                  key={key}
+                  title={category.title}
+                  color={category.color}
+                  projects={category.projects}
+                  onClick={() => handleCategoryClick(key)}
+                />
+              ))}
+          </MasonryLayout>
+        </AnimatePresence>
 
         {selectedCategory && categorizedProjects[selectedCategory] && (
           <ProjectsGrid
