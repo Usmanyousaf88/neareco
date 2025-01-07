@@ -29,7 +29,6 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
 
     // Calculate optimal grid layout
     const numCategories = visibleCats.length;
-    const aspectRatio = availableWidth / availableHeight;
     
     // Use D3's treemap layout to calculate optimal sizes
     const treemap = d3.treemap<any>()
@@ -71,12 +70,26 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
       const cardHeight = d.y1 - d.y0;
       const category = d.data.category;
       
-      // Calculate optimal project icon size based on card dimensions
-      const numProjects = category.projects.length;
+      // Calculate optimal project icon size and number of columns
+      const minIconSize = 40; // minimum icon size
+      const maxIconSize = 60; // maximum icon size
+      const padding = 16; // padding between icons
+      
+      // Calculate how many icons can fit in the width and height
+      const maxColumns = Math.floor((cardWidth - padding) / (minIconSize + padding));
+      const maxRows = Math.floor((cardHeight - padding - 40) / (minIconSize + padding + 20)); // 40 for title, 20 for label
+      
+      // Calculate maximum number of projects that can fit
+      const maxProjects = maxColumns * maxRows;
+      
+      // Filter projects to only show what fits
+      const visibleProjects = category.projects.slice(0, maxProjects);
+      
+      // Calculate actual icon size based on available space and number of projects
       const iconSize = Math.min(
-        Math.floor(cardWidth / Math.ceil(Math.sqrt(numProjects))),
-        Math.floor(cardHeight / Math.ceil(Math.sqrt(numProjects))),
-        60 // max icon size
+        Math.floor((cardWidth - padding * (maxColumns + 1)) / maxColumns),
+        Math.floor((cardHeight - padding * (maxRows + 1) - 40) / maxRows),
+        maxIconSize
       );
 
       card.html(`
@@ -85,7 +98,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
             ${category.title}
           </h2>
           <div class="grid gap-3 flex-1" style="grid-template-columns: repeat(auto-fill, minmax(${iconSize}px, 1fr)); align-content: start">
-            ${category.projects.map(project => `
+            ${visibleProjects.map(project => `
               <div class="flex flex-col items-center gap-1">
                 <div class="rounded-full bg-gray-800 overflow-hidden flex items-center justify-center"
                      style="width: ${iconSize}px; height: ${iconSize}px">
