@@ -78,6 +78,7 @@ const priorityCategories = [
   'ecosystem-support',
   'education',
   'game',
+  'launchpad',
   'liquid-staking',
   'memecoin',
   'nft',
