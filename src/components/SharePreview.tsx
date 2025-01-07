@@ -85,8 +85,6 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
           width: 60
         });
 
-        canvas.add(projectCircle, projectText);
-
         // Draw line connecting project to category
         const line = new Line([x, y, projectX, projectY], {
           stroke: '#ffffff',
@@ -94,8 +92,12 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
           opacity: 0.3
         });
 
-        canvas.sendToBack(line);
+        // Add line first so it appears behind other elements
         canvas.add(line);
+        canvas.sendObjectToBack(line);
+        
+        // Add project circle and text
+        canvas.add(projectCircle, projectText);
       });
     });
 
