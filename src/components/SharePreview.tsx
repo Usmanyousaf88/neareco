@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Canvas as FabricCanvas, Rect, Text, Image, Shadow } from 'fabric';
+import { Canvas as FabricCanvas, Rect, Text, Image } from 'fabric';
 import { CategorizedProjects } from '@/types/projects';
 
 interface SharePreviewProps {
@@ -22,7 +22,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
   useEffect(() => {
     if (!canvasRef.current) return;
 
-    // Initialize Fabric canvas
+    // Initialize Fabric canvas with 16:9 aspect ratio
     const canvas = new FabricCanvas(canvasRef.current, {
       width: 1920,
       height: 1080,
@@ -37,95 +37,77 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
     const visibleCats = Object.entries(categories)
       .filter(([key]) => visibleCategories[key]);
 
-    let currentX = 60;
-    let currentY = 60;
-    const maxHeight = canvas.getHeight() - 120;
-    const maxWidth = canvas.getWidth() - 120;
+    // Calculate layout
+    const padding = 40;
+    const maxWidth = canvas.getWidth() - (padding * 2);
+    const maxHeight = canvas.getHeight() - (padding * 2);
+    const categorySpacing = 60;
+    const projectSpacing = 20;
+
+    let currentY = padding;
 
     // Draw each category and its projects
     const drawCategories = async () => {
       for (const [key, category] of visibleCats) {
         // Add category title
         const categoryText = new Text(category.title, {
-          left: currentX,
+          left: padding,
           top: currentY,
-          fontSize: 36,
+          fontSize: 32,
           fill: '#ffffff',
           fontWeight: 'bold',
-          width: 300,
           selectable: false,
           evented: false,
         });
 
         canvas.add(categoryText);
-        currentY += 80;
+        currentY += 50;
 
-        // Process projects
-        for (const [index, project] of category.projects.entries()) {
-          const width = Math.max(320, Math.min(480, project.name.length * 10));
-          const height = width * (9/16);
+        // Calculate project card dimensions
+        const projectsPerRow = Math.min(4, category.projects.length);
+        const cardWidth = (maxWidth - (projectSpacing * (projectsPerRow - 1))) / projectsPerRow;
+        const cardHeight = cardWidth * 0.6;
 
-          // Check if we need to move to next row or column
-          if (currentX + width > maxWidth) {
-            currentX = 60;
-            currentY += height + 40;
-          }
+        // Process projects in rows
+        for (let i = 0; i < category.projects.length; i++) {
+          const project = category.projects[i];
+          const row = Math.floor(i / projectsPerRow);
+          const col = i % projectsPerRow;
 
-          if (currentY + height > maxHeight) {
-            currentY = 60;
-            currentX = Math.min(currentX + width + 40, maxWidth - width);
-          }
+          const cardX = padding + (col * (cardWidth + projectSpacing));
+          const cardY = currentY + (row * (cardHeight + projectSpacing));
 
           // Create card background
           const card = new Rect({
-            left: currentX,
-            top: currentY,
-            width: width,
-            height: height,
+            left: cardX,
+            top: cardY,
+            width: cardWidth,
+            height: cardHeight,
             fill: category.color || '#1a2e3b',
-            rx: 12,
-            ry: 12,
+            rx: 8,
+            ry: 8,
             selectable: false,
             evented: false,
-            shadow: new Shadow({
-              color: 'rgba(0,0,0,0.3)',
-              blur: 10,
-              offsetX: 0,
-              offsetY: 4
-            })
           });
 
           // Add project image
           try {
+            const imageUrl = PLACEHOLDER_IMAGES[i % PLACEHOLDER_IMAGES.length];
             await new Promise<void>((resolve) => {
-              const imageUrl = PLACEHOLDER_IMAGES[index % PLACEHOLDER_IMAGES.length];
               Image.fromURL(imageUrl, {
-                callback: (img) => {
-                  img.scaleToWidth(width);
-                  const scaledHeight = img.getScaledHeight();
-                  if (scaledHeight > height * 0.6) {
-                    img.scaleToHeight(height * 0.6);
-                  }
-                  
-                  img.set({
-                    left: currentX,
-                    top: currentY,
-                    selectable: false,
-                    evented: false,
-                    clipPath: new Rect({
-                      width: width,
-                      height: height * 0.6,
-                      rx: 12,
-                      ry: 12,
-                      absolutePositioned: true,
-                      left: currentX,
-                      top: currentY
-                    })
-                  });
-                  
-                  canvas.add(img);
-                  resolve();
-                }
+                scaleX: cardWidth / 300,
+                scaleY: cardWidth / 300,
+              }).then((img) => {
+                img.set({
+                  left: cardX,
+                  top: cardY,
+                  width: cardWidth,
+                  height: cardHeight * 0.6,
+                  selectable: false,
+                  evented: false,
+                });
+                canvas.add(img);
+                resolve();
               });
             });
           } catch (error) {
@@ -134,12 +116,12 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
 
           // Add project name
           const nameText = new Text(project.name, {
-            left: currentX + 20,
-            top: currentY + height * 0.65,
-            fontSize: 24,
+            left: cardX + 10,
+            top: cardY + (cardHeight * 0.65),
+            fontSize: 18,
             fill: '#ffffff',
             fontWeight: 'bold',
-            width: width - 40,
+            width: cardWidth - 20,
             selectable: false,
             evented: false,
           });
@@ -147,11 +129,11 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
           // Add project tagline if exists
           if (project.tagline) {
             const taglineText = new Text(project.tagline, {
-              left: currentX + 20,
-              top: currentY + height * 0.8,
-              fontSize: 16,
+              left: cardX + 10,
+              top: cardY + (cardHeight * 0.8),
+              fontSize: 14,
               fill: '#ffffff',
-              width: width - 40,
+              width: cardWidth - 20,
               lineHeight: 1.2,
               opacity: 0.8,
               selectable: false,
@@ -161,11 +143,11 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
           }
 
           canvas.add(card, nameText);
-          currentX += width + 40;
         }
 
-        currentX = 60;
-        currentY += 320;
+        // Update currentY for next category
+        const rowCount = Math.ceil(category.projects.length / projectsPerRow);
+        currentY += (rowCount * (cardHeight + projectSpacing)) + categorySpacing;
       }
     };
 
