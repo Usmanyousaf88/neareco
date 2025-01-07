@@ -68,8 +68,8 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
       const padding = 24;
       
       // Adjust the grid to allow more space for text
-      const maxColumns = Math.floor((cardWidth - padding) / (minIconSize + padding));
-      const maxRows = Math.floor((cardHeight - padding - 60) / (minIconSize + padding + 48)); // Increased text space
+      const maxColumns = Math.floor((cardWidth - padding) / (minIconSize + padding + 48)); // Added extra space horizontally
+      const maxRows = Math.floor((cardHeight - padding - 60) / (minIconSize + padding + 48));
       
       const maxProjects = maxColumns * maxRows;
       const visibleProjects = category.projects.slice(0, maxProjects);
@@ -85,7 +85,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
           <h2 class="text-2xl font-semibold text-[#60a5fa] mb-4 truncate">
             ${category.title}
           </h2>
-          <div class="grid gap-6 flex-1" style="grid-template-columns: repeat(auto-fill, minmax(${iconSize}px, 1fr)); align-content: start">
+          <div class="grid gap-8 flex-1" style="grid-template-columns: repeat(auto-fill, minmax(${iconSize + 48}px, 1fr)); align-content: start">
             ${visibleProjects.map(project => `
               <div class="flex flex-col items-center gap-4">
                 <div class="rounded-full bg-gray-800 overflow-hidden flex items-center justify-center"
@@ -97,7 +97,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
                     onerror="this.src='/placeholder.svg'"
                   />
                 </div>
-                <span class="text-white text-base truncate text-center w-full px-4 max-w-[160px]" title="${project.name}">
+                <span class="text-white text-base text-center w-full px-2 max-w-[200px] whitespace-normal" title="${project.name}">
                   ${project.name}
                 </span>
               </div>
