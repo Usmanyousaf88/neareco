@@ -17,8 +17,8 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
     d3.select(svgRef.current).selectAll("*").remove();
 
     // Setup dimensions
-    const width = 3840;
-    const height = 2160;
+    const width = 1920; // Reduced from 3840 for better initial fit
+    const height = 1080; // Reduced from 2160 for better initial fit
     const padding = 40;
     const sectionPadding = 20;
 
@@ -144,7 +144,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
 
   return (
     <div className="w-full h-full" id="share-preview">
-      <svg ref={svgRef} />
+      <svg ref={svgRef} style={{ maxWidth: '100%', height: 'auto' }} />
     </div>
   );
 };
