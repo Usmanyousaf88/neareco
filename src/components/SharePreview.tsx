@@ -52,8 +52,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
       .selectAll('.category-card')
       .data(root.leaves())
       .join('div')
-      .attr('class', 'category-card')
-      .style('position', 'absolute')
+      .attr('class', 'category-card absolute')
       .style('left', d => `${d.x0}px`)
       .style('top', d => `${d.y0 + titleHeight}px`)
       .style('width', d => `${d.x1 - d.x0}px`)
@@ -110,15 +109,12 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
   }, [visibleCats]);
 
   return (
-    <div 
-      className="relative w-[1920px] h-[1080px] bg-[#0A0F1C] text-left overflow-hidden" 
-      ref={containerRef}
-    >
+    <div className="w-[1920px] h-[1080px] bg-[#0A0F1C] text-left relative" ref={containerRef}>
       <h1 className="text-2xl font-bold text-white p-8 pb-4">
         NEAR Protocol Ecosystem Map
       </h1>
       
-      <div className="grid-container relative">
+      <div className="grid-container absolute inset-0 pt-[60px] pb-[30px] px-[40px]">
         {/* D3 will inject content here */}
       </div>
 
