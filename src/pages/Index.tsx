@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from 'framer-motion';
 import html2canvas from 'html2canvas';
 import { Share2 } from 'lucide-react';
+import SharePreview from '@/components/SharePreview';
 
 const fetchProjects = async (): Promise<ProjectsResponse> => {
   const response = await fetch('https://api.nearcatalog.xyz/projects');
@@ -61,29 +62,16 @@ const Index = () => {
   };
 
   const handleShare = async () => {
-    if (!contentRef.current) return;
-
     try {
       toast({
         title: "Generating image...",
         description: "Please wait while we create your share image.",
       });
 
-      const tempDiv = document.createElement('div');
-      tempDiv.style.width = '3840px'; // 4K width
-      tempDiv.style.height = '2160px'; // 4K height (16:9)
-      tempDiv.style.position = 'absolute';
-      tempDiv.style.left = '-9999px';
-      tempDiv.style.background = 'linear-gradient(to bottom right, rgb(17, 24, 39), rgb(31, 41, 55))';
-      tempDiv.style.padding = '64px';
-      
-      const clone = contentRef.current.cloneNode(true) as HTMLElement;
-      clone.style.transform = 'scale(2)'; // Scale up the content
-      clone.style.transformOrigin = 'top left';
-      tempDiv.appendChild(clone);
-      document.body.appendChild(tempDiv);
+      const sharePreviewElement = document.querySelector('svg');
+      if (!sharePreviewElement) return;
 
-      const canvas = await html2canvas(tempDiv, {
+      const canvas = await html2canvas(sharePreviewElement, {
         width: 3840,
         height: 2160,
         scale: 1,
@@ -95,8 +83,6 @@ const Index = () => {
       link.download = 'near-ecosystem-map.png';
       link.href = image;
       link.click();
-
-      document.body.removeChild(tempDiv);
 
       toast({
         title: "Success!",
@@ -220,6 +206,7 @@ const Index = () => {
         </motion.div>
 
         <div ref={contentRef}>
+          <SharePreview categories={categorizedProjects} />
           <AnimatePresence>
             <MasonryLayout breakpointColumns={breakpointColumns}>
               {Object.entries(categorizedProjects)
