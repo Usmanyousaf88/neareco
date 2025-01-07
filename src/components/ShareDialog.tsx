@@ -27,6 +27,8 @@ const ShareDialog = ({ open, onOpenChange, categories, visibleCategories }: Shar
         scale: 2,
         backgroundColor: '#0A0F1C',
         logging: false,
+        useCORS: true,
+        allowTaint: true,
       });
       return canvas;
     } catch (error) {
@@ -40,16 +42,17 @@ const ShareDialog = ({ open, onOpenChange, categories, visibleCategories }: Shar
       const canvas = await capturePreview();
       if (!canvas) throw new Error('Failed to capture preview');
 
-      const blob = await new Promise<Blob>((resolve, reject) => {
-        canvas.toBlob((blob) => {
-          if (blob) resolve(blob);
-          else reject(new Error('Failed to create blob'));
+      // Convert canvas to blob
+      const blob = await new Promise<Blob>((resolve) => {
+        canvas.toBlob((b) => {
+          if (b) resolve(b);
+          else throw new Error('Failed to create blob');
         }, 'image/png');
       });
 
-      await navigator.clipboard.write([
-        new ClipboardItem({ 'image/png': blob })
-      ]);
+      // Create a ClipboardItem and write to clipboard
+      const data = new ClipboardItem({ 'image/png': blob });
+      await navigator.clipboard.write([data]);
 
       toast({
         title: "Copied!",
@@ -70,10 +73,13 @@ const ShareDialog = ({ open, onOpenChange, categories, visibleCategories }: Shar
       const canvas = await capturePreview();
       if (!canvas) throw new Error('Failed to capture preview');
 
+      // Create download link
       const link = document.createElement('a');
       link.download = 'near-ecosystem-map.png';
       link.href = canvas.toDataURL('image/png');
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
 
       toast({
         title: "Downloaded!",
@@ -103,7 +109,6 @@ const ShareDialog = ({ open, onOpenChange, categories, visibleCategories }: Shar
     const hashtags = "NEAR,Web3,Blockchain";
     
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&hashtags=${encodeURIComponent(hashtags)}`;
-    
     window.open(twitterUrl, '_blank');
     
     toast({
