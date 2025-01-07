@@ -27,54 +27,63 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
 
     const width = 3840;
     const height = 2160;
-    const padding = 24;
+    const padding = 16;
     const titleHeight = 80;
-    const minCategoryWidth = 400;
-    const minCategoryHeight = 280;
 
-    // Available space for the grid
-    const availableWidth = width - (padding * 2);
-    const availableHeight = height - titleHeight - (padding * 2);
+    // Create hierarchical data for treemap
+    const hierarchyData = {
+      name: "root",
+      children: visibleCats.map(([key, category]) => ({
+        name: category.title,
+        value: Math.max(category.projects.length * 100, 300), // Minimum size for categories
+        category: category,
+        key: key
+      }))
+    };
 
-    // Calculate optimal grid layout
-    const totalCategories = visibleCats.length;
-    const goldenRatio = 1.618;
-    const aspectRatio = availableWidth / availableHeight;
-    const idealCols = Math.sqrt(totalCategories * aspectRatio / goldenRatio);
-    const cols = Math.max(1, Math.round(idealCols));
-    const rows = Math.ceil(totalCategories / cols);
+    // Create treemap layout
+    const treemap = d3.treemap()
+      .size([width - padding * 2, height - titleHeight - padding * 2])
+      .paddingOuter(padding)
+      .paddingInner(padding)
+      .round(true);
 
-    // Calculate cell dimensions
-    const cellWidth = Math.max(minCategoryWidth, Math.floor(availableWidth / cols) - padding);
-    const cellHeight = Math.max(minCategoryHeight, Math.floor(availableHeight / rows) - padding);
+    const root = d3.hierarchy(hierarchyData)
+      .sum(d => (d as any).value)
+      .sort((a, b) => (b.value || 0) - (a.value || 0));
 
-    // Create grid layout
-    visibleCats.forEach(([key, category], index) => {
-      const row = Math.floor(index / cols);
-      const col = index % cols;
-      const x = padding + (col * (cellWidth + padding));
-      const y = titleHeight + padding + (row * (cellHeight + padding));
+    treemap(root);
+
+    // Create cards for each category
+    root.leaves().forEach(leaf => {
+      const category = (leaf.data as any).category;
+      const key = (leaf.data as any).key;
+
+      const x = leaf.x0 + padding;
+      const y = leaf.y0 + titleHeight;
+      const width = leaf.x1 - leaf.x0;
+      const height = leaf.y1 - leaf.y0;
 
       const card = container.append('div')
         .attr('class', 'category-card absolute')
         .style('left', `${x}px`)
         .style('top', `${y}px`)
-        .style('width', `${cellWidth}px`)
-        .style('height', `${cellHeight}px`);
+        .style('width', `${width}px`)
+        .style('height', `${height}px`);
 
+      const cardPadding = 16;
       const minIconSize = 48;
       const maxIconSize = 64;
-      const cardPadding = 20;
       
-      const maxColumns = Math.floor((cellWidth - cardPadding * 2) / (minIconSize + 8));
-      const maxRows = Math.floor((cellHeight - cardPadding * 2 - 40) / (minIconSize + 24));
+      const maxColumns = Math.floor((width - cardPadding * 2) / (minIconSize + 8));
+      const maxRows = Math.floor((height - cardPadding * 2 - 40) / (minIconSize + 16));
       
       const maxProjects = maxColumns * maxRows;
       const visibleProjects = category.projects.slice(0, maxProjects);
       
       const iconSize = Math.min(
-        Math.floor((cellWidth - cardPadding * (maxColumns + 1)) / maxColumns),
-        Math.floor((cellHeight - cardPadding * (maxRows + 1) - 40) / maxRows),
+        Math.floor((width - cardPadding * 2) / maxColumns) - 8,
+        Math.floor((height - cardPadding * 2 - 40) / maxRows) - 8,
         maxIconSize
       );
 
@@ -84,11 +93,11 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
       };
 
       card.html(`
-        <div class="h-full bg-[#111827] border border-[#1d4ed8]/30 rounded-xl p-5 flex flex-col overflow-visible shadow-lg">
-          <h2 class="text-xl font-semibold text-[#60a5fa] mb-4 line-clamp-1">
+        <div class="h-full bg-[#111827] border border-[#1d4ed8]/30 rounded-xl p-4 flex flex-col overflow-visible shadow-lg">
+          <h2 class="text-lg font-semibold text-[#60a5fa] mb-3 line-clamp-1">
             ${category.title}
           </h2>
-          <div class="grid gap-4 overflow-visible" style="grid-template-columns: repeat(auto-fill, minmax(${iconSize}px, 1fr));">
+          <div class="grid gap-3 overflow-visible" style="grid-template-columns: repeat(auto-fill, minmax(${iconSize}px, 1fr));">
             ${visibleProjects.map(project => `
               <div class="flex flex-col items-center gap-2 overflow-visible">
                 <div class="rounded-full bg-gray-800/50 overflow-hidden flex items-center justify-center z-10 backdrop-blur-sm shadow-lg"
