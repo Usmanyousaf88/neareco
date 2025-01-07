@@ -27,9 +27,6 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
     const availableWidth = width - (padding * 2);
     const availableHeight = height - titleHeight - footerHeight - (padding * 2);
 
-    // Calculate optimal grid layout
-    const numCategories = visibleCats.length;
-    
     // Use D3's treemap layout to calculate optimal sizes
     const treemap = d3.treemap<any>()
       .size([availableWidth, availableHeight])
@@ -48,11 +45,8 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
 
     // Apply calculated dimensions to DOM
     const container = d3.select(containerRef.current);
-    
-    // Clear previous calculations
     container.selectAll('.category-card').remove();
 
-    // Create category cards with calculated dimensions
     const cards = container.select('.grid-container')
       .selectAll('.category-card')
       .data(root.leaves())
@@ -71,13 +65,13 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
       const category = d.data.category;
       
       // Calculate optimal project icon size and number of columns
-      const minIconSize = 40; // minimum icon size
-      const maxIconSize = 60; // maximum icon size
-      const padding = 16; // padding between icons
+      const minIconSize = 40;
+      const maxIconSize = 60;
+      const padding = 16;
       
       // Calculate how many icons can fit in the width and height
       const maxColumns = Math.floor((cardWidth - padding) / (minIconSize + padding));
-      const maxRows = Math.floor((cardHeight - padding - 40) / (minIconSize + padding + 20)); // 40 for title, 20 for label
+      const maxRows = Math.floor((cardHeight - padding - 40) / (minIconSize + padding + 20));
       
       // Calculate maximum number of projects that can fit
       const maxProjects = maxColumns * maxRows;
