@@ -46,7 +46,7 @@ interface EcosystemMap3DProps {
 const EcosystemMap3D: React.FC<EcosystemMap3DProps> = ({ categories, visibleCategories }) => {
   const nodes = useMemo(() => {
     const visibleNodes: NodeProps[] = [];
-    const radius = 15;
+    const radius = 25; // Increased from 15 to give more space
     const categoryCount = Object.keys(categories).filter(key => visibleCategories[key]).length;
     let categoryIndex = 0;
 
@@ -65,7 +65,7 @@ const EcosystemMap3D: React.FC<EcosystemMap3DProps> = ({ categories, visibleCate
       });
 
       const projectCount = category.projects.length;
-      const projectRadius = 5;
+      const projectRadius = 8; // Increased from 5 to spread projects out more
       
       category.projects.forEach((project, projectIndex) => {
         const projectAngle = (projectIndex * 2 * Math.PI) / projectCount;
@@ -94,7 +94,7 @@ const EcosystemMap3D: React.FC<EcosystemMap3DProps> = ({ categories, visibleCate
           powerPreference: "high-performance"
         }}
         camera={{ 
-          position: [0, 20, 35],
+          position: [0, 30, 50], // Adjusted camera position for better view
           fov: 75,
           near: 0.1,
           far: 1000
@@ -109,11 +109,11 @@ const EcosystemMap3D: React.FC<EcosystemMap3DProps> = ({ categories, visibleCate
           enablePan={true}
           enableZoom={true}
           enableRotate={true}
-          minDistance={10}
-          maxDistance={50}
+          minDistance={20}
+          maxDistance={100} // Increased to allow viewing the larger layout
           makeDefault
         />
-        <fog attach="fog" args={['#0a1929', 20, 80]} />
+        <fog attach="fog" args={['#0a1929', 30, 100]} /> // Adjusted fog distance
         {nodes.map((node, index) => (
           <Node key={`${node.name}-${index}`} {...node} />
         ))}
