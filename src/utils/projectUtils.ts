@@ -91,34 +91,42 @@ export const categorizeProjects = (projectsData: ProjectsResponse): CategorizedP
   const tagCounts = new Map<string, number>();
   Object.values(projectsData).forEach((project) => {
     Object.entries(project.profile.tags).forEach(([tag, value]) => {
-      // Normalize both the tag key and the stored value
-      const normalizedTag = tag.toLowerCase().replace(/ /g, '-');
+      // Normalize tag to lowercase and replace spaces with hyphens
+      const normalizedTag = tag.toLowerCase().trim().replace(/\s+/g, '-');
       tagCounts.set(normalizedTag, (tagCounts.get(normalizedTag) || 0) + 1);
     });
   });
 
   // Sort projects by number of tags to help with distribution
-  const sortedProjects = Object.values(projectsData).sort((a, b) => 
+  const sortedProjects = Object.entries(projectsData).sort(([, a], [, b]) => 
     Object.keys(b.profile.tags).length - Object.keys(a.profile.tags).length
   );
 
   // Distribute projects across categories
-  sortedProjects.forEach((project) => {
+  sortedProjects.forEach(([projectId, project]) => {
     Object.entries(project.profile.tags).forEach(([tag, value]) => {
-      // Normalize both the tag key and the stored value
-      const normalizedTag = tag.toLowerCase().replace(/ /g, '-');
+      // Normalize tag to lowercase and replace spaces with hyphens
+      const normalizedTag = tag.toLowerCase().trim().replace(/\s+/g, '-');
       
-      if (!categories[normalizedTag]) {
-        categories[normalizedTag] = {
+      // Special handling for Aurora Virtual Chain
+      const finalTag = normalizedTag === 'aurora-virtual-chain' || 
+                      normalizedTag === 'aurora' || 
+                      normalizedTag === 'aurora-chain' ? 
+                      'aurora-virtual-chain' : normalizedTag;
+      
+      if (!categories[finalTag]) {
+        categories[finalTag] = {
           title: value, // Use the original tag value as the display title
-          color: categoryColors[normalizedTag] || "bg-gray-500",
+          color: categoryColors[finalTag] || "bg-gray-500",
           projects: [],
-          isPriority: priorityCategories.includes(normalizedTag)
+          isPriority: priorityCategories.includes(finalTag)
         };
       }
       
-      if (!categories[normalizedTag].projects.find(p => p.name === project.profile.name)) {
-        categories[normalizedTag].projects.push({
+      // Only add the project if it's not already in the category
+      const existingProject = categories[finalTag].projects.find(p => p.name === project.profile.name);
+      if (!existingProject) {
+        categories[finalTag].projects.push({
           name: project.profile.name,
           image: project.profile.image.url,
           tagline: project.profile.tagline
@@ -134,12 +142,10 @@ export const categorizeProjects = (projectsData: ProjectsResponse): CategorizedP
         const isPriorityA = priorityCategories.includes(keyA);
         const isPriorityB = priorityCategories.includes(keyB);
 
-        // If both are priority or both are not priority, sort alphabetically by title
         if (isPriorityA === isPriorityB) {
           return valueA.title.localeCompare(valueB.title);
         }
         
-        // If only one is priority, it goes first
         return isPriorityA ? -1 : 1;
       })
   );
