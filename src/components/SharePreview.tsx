@@ -33,7 +33,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
     // Use D3's treemap layout
     const treemap = d3.treemap<any>()
       .size([availableWidth, availableHeight])
-      .padding(24) // Increased padding between category cards
+      .padding(24) // Padding between category cards
       .round(true);
 
     const root = d3.hierarchy({
@@ -65,10 +65,11 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
       
       const minIconSize = 72;
       const maxIconSize = 96;
-      const padding = 24; // Increased padding inside cards
+      const padding = 24;
       
+      // Adjust the grid to allow more space for text
       const maxColumns = Math.floor((cardWidth - padding) / (minIconSize + padding));
-      const maxRows = Math.floor((cardHeight - padding - 60) / (minIconSize + padding + 40)); // Increased spacing for text
+      const maxRows = Math.floor((cardHeight - padding - 60) / (minIconSize + padding + 48)); // Increased text space
       
       const maxProjects = maxColumns * maxRows;
       const visibleProjects = category.projects.slice(0, maxProjects);
@@ -80,13 +81,13 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
       );
 
       card.html(`
-        <div class="h-full bg-[#111827] border border-[#1d4ed8] rounded-xl p-6 flex flex-col"> <!-- Increased padding -->
-          <h2 class="text-2xl font-semibold text-[#60a5fa] mb-4 truncate"> <!-- Increased margin -->
+        <div class="h-full bg-[#111827] border border-[#1d4ed8] rounded-xl p-6 flex flex-col">
+          <h2 class="text-2xl font-semibold text-[#60a5fa] mb-4 truncate">
             ${category.title}
           </h2>
-          <div class="grid gap-6 flex-1" style="grid-template-columns: repeat(auto-fill, minmax(${iconSize}px, 1fr)); align-content: start"> <!-- Increased gap -->
+          <div class="grid gap-6 flex-1" style="grid-template-columns: repeat(auto-fill, minmax(${iconSize}px, 1fr)); align-content: start">
             ${visibleProjects.map(project => `
-              <div class="flex flex-col items-center gap-4"> <!-- Increased gap -->
+              <div class="flex flex-col items-center gap-4">
                 <div class="rounded-full bg-gray-800 overflow-hidden flex items-center justify-center"
                      style="width: ${iconSize}px; height: ${iconSize}px">
                   <img
@@ -96,7 +97,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
                     onerror="this.src='/placeholder.svg'"
                   />
                 </div>
-                <span class="text-white text-base truncate text-center w-full px-2" title="${project.name}"> <!-- Increased padding -->
+                <span class="text-white text-base truncate text-center w-full px-4 max-w-[160px]" title="${project.name}">
                   ${project.name}
                 </span>
               </div>
