@@ -69,7 +69,6 @@ export const categoryColors: { [key: string]: string } = {
   "zero-knowledge": "bg-blue-900"
 };
 
-// Define priority categories that should appear first (alphabetically ordered)
 const priorityCategories = [
   'ai',
   'aurora-virtual-chain',
@@ -91,9 +90,9 @@ export const categorizeProjects = (projectsData: ProjectsResponse): CategorizedP
   // Calculate total projects per tag for better distribution
   const tagCounts = new Map<string, number>();
   Object.values(projectsData).forEach((project) => {
-    Object.keys(project.profile.tags).forEach((tag) => {
-      // Normalize the tag to use hyphens
-      const normalizedTag = tag.replace(/ /g, '-');
+    Object.entries(project.profile.tags).forEach(([tag, value]) => {
+      // Normalize both the tag key and the stored value
+      const normalizedTag = tag.toLowerCase().replace(/ /g, '-');
       tagCounts.set(normalizedTag, (tagCounts.get(normalizedTag) || 0) + 1);
     });
   });
@@ -105,18 +104,19 @@ export const categorizeProjects = (projectsData: ProjectsResponse): CategorizedP
 
   // Distribute projects across categories
   sortedProjects.forEach((project) => {
-    const projectTags = Object.keys(project.profile.tags);
-    projectTags.forEach((tag) => {
-      // Normalize the tag to use hyphens
-      const normalizedTag = tag.replace(/ /g, '-');
+    Object.entries(project.profile.tags).forEach(([tag, value]) => {
+      // Normalize both the tag key and the stored value
+      const normalizedTag = tag.toLowerCase().replace(/ /g, '-');
+      
       if (!categories[normalizedTag]) {
         categories[normalizedTag] = {
-          title: project.profile.tags[tag],
+          title: value, // Use the original tag value as the display title
           color: categoryColors[normalizedTag] || "bg-gray-500",
           projects: [],
           isPriority: priorityCategories.includes(normalizedTag)
         };
       }
+      
       if (!categories[normalizedTag].projects.find(p => p.name === project.profile.name)) {
         categories[normalizedTag].projects.push({
           name: project.profile.name,
