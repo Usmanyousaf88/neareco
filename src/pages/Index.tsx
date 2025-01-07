@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from '@tanstack/react-query';
 import CategoryCard from '@/components/CategoryCard';
@@ -10,6 +10,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from 'framer-motion';
+import html2canvas from 'html2canvas';
+import { Share2 } from 'lucide-react';
 
 const fetchProjects = async (): Promise<ProjectsResponse> => {
   const response = await fetch('https://api.nearcatalog.xyz/projects');
@@ -31,6 +33,7 @@ const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [visibleCategories, setVisibleCategories] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const { data: projectsData, isLoading, error } = useQuery({
     queryKey: ['projects'],
@@ -42,7 +45,6 @@ const Index = () => {
     return categorizeProjects(projectsData);
   }, [projectsData]);
 
-  // Initialize visible categories when data loads
   React.useEffect(() => {
     if (projectsData) {
       const categories = Object.keys(categorizeProjects(projectsData));
@@ -54,16 +56,55 @@ const Index = () => {
     }
   }, [projectsData]);
 
-  const handleCategoryClick = (key: string) => {
+  const handleShare = async () => {
+    if (!contentRef.current) return;
+
     try {
-      setSelectedCategory(key);
+      toast({
+        title: "Generating image...",
+        description: "Please wait while we create your share image.",
+      });
+
+      const tempDiv = document.createElement('div');
+      tempDiv.style.width = '3840px'; // 4K width
+      tempDiv.style.height = '2160px'; // 4K height (16:9)
+      tempDiv.style.position = 'absolute';
+      tempDiv.style.left = '-9999px';
+      tempDiv.style.background = 'linear-gradient(to bottom right, rgb(17, 24, 39), rgb(31, 41, 55))';
+      tempDiv.style.padding = '64px';
+      
+      const clone = contentRef.current.cloneNode(true) as HTMLElement;
+      clone.style.transform = 'scale(2)'; // Scale up the content
+      clone.style.transformOrigin = 'top left';
+      tempDiv.appendChild(clone);
+      document.body.appendChild(tempDiv);
+
+      const canvas = await html2canvas(tempDiv, {
+        width: 3840,
+        height: 2160,
+        scale: 1,
+        backgroundColor: null,
+      });
+
+      const image = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.download = 'near-ecosystem-map.png';
+      link.href = image;
+      link.click();
+
+      document.body.removeChild(tempDiv);
+
+      toast({
+        title: "Success!",
+        description: "Your image has been generated and downloaded.",
+      });
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to load category details. Please try again.",
+        description: "Failed to generate share image. Please try again.",
         variant: "destructive",
       });
-      console.error("Error selecting category:", error);
+      console.error("Error generating share image:", error);
     }
   };
 
@@ -105,7 +146,6 @@ const Index = () => {
     );
   }
 
-  // Sort categories alphabetically by title
   const sortedCategories = Object.entries(categorizedProjects).sort((a, b) => 
     a[1].title.localeCompare(b[1].title)
   );
@@ -129,14 +169,26 @@ const Index = () => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={toggleAllCategories}
-            className="mb-4"
-          >
-            {areAllChecked ? 'Uncheck All' : 'Check All'}
-          </Button>
+          <div className="w-full flex flex-wrap gap-4 justify-center items-center">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={toggleAllCategories}
+              className="mb-4"
+            >
+              {areAllChecked ? 'Uncheck All' : 'Check All'}
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleShare}
+              className="mb-4"
+            >
+              <Share2 className="w-4 h-4 mr-2" />
+              Share
+            </Button>
+          </div>
           
           <div className="w-full flex flex-wrap gap-4 justify-center">
             {sortedCategories.map(([key, category]) => (
@@ -162,29 +214,31 @@ const Index = () => {
           </div>
         </motion.div>
 
-        <AnimatePresence>
-          <MasonryLayout breakpointColumns={breakpointColumns}>
-            {Object.entries(categorizedProjects)
-              .filter(([key]) => visibleCategories[key])
-              .map(([key, category]) => (
-                <CategoryCard
-                  key={key}
-                  title={category.title}
-                  color={category.color}
-                  projects={category.projects}
-                  onClick={() => handleCategoryClick(key)}
-                  isPriority={category.isPriority}
-                />
-              ))}
-          </MasonryLayout>
-        </AnimatePresence>
+        <div ref={contentRef}>
+          <AnimatePresence>
+            <MasonryLayout breakpointColumns={breakpointColumns}>
+              {Object.entries(categorizedProjects)
+                .filter(([key]) => visibleCategories[key])
+                .map(([key, category]) => (
+                  <CategoryCard
+                    key={key}
+                    title={category.title}
+                    color={category.color}
+                    projects={category.projects}
+                    onClick={() => handleCategoryClick(key)}
+                    isPriority={category.isPriority}
+                  />
+                ))}
+            </MasonryLayout>
+          </AnimatePresence>
 
-        {selectedCategory && categorizedProjects[selectedCategory] && (
-          <ProjectsGrid
-            title={categorizedProjects[selectedCategory].title}
-            projects={categorizedProjects[selectedCategory].projects}
-          />
-        )}
+          {selectedCategory && categorizedProjects[selectedCategory] && (
+            <ProjectsGrid
+              title={categorizedProjects[selectedCategory].title}
+              projects={categorizedProjects[selectedCategory].projects}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
