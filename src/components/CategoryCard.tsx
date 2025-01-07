@@ -12,9 +12,10 @@ interface CategoryCardProps {
   color: string;
   projects: Project[];
   onClick: () => void;
+  isPriority?: boolean;
 }
 
-const CategoryCard = ({ title, color, projects, onClick }: CategoryCardProps) => {
+const CategoryCard = ({ title, color, projects, onClick, isPriority = false }: CategoryCardProps) => {
   return (
     <motion.div
       layout
@@ -28,11 +29,23 @@ const CategoryCard = ({ title, color, projects, onClick }: CategoryCardProps) =>
           ease: "easeInOut"
         }
       }}
-      className={`${color} rounded-lg p-6 cursor-pointer flex flex-col w-full`}
+      className={`${color} rounded-lg p-6 cursor-pointer flex flex-col w-full ${
+        isPriority ? 'ring-2 ring-white/20 shadow-lg' : ''
+      }`}
       whileHover={{ y: -5 }}
       onClick={onClick}
     >
-      <motion.h2 layout="position" className="text-2xl font-bold mb-4">{title}</motion.h2>
+      <motion.h2 
+        layout="position" 
+        className={`text-2xl font-bold mb-4 ${isPriority ? 'flex items-center gap-2' : ''}`}
+      >
+        {isPriority && (
+          <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-medium rounded-full bg-white/10">
+            Featured
+          </span>
+        )}
+        {title}
+      </motion.h2>
       <motion.div layout="position" className="flex flex-wrap gap-3">
         {projects.map((project) => (
           <motion.div 

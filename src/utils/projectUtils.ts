@@ -69,17 +69,17 @@ export const categoryColors: { [key: string]: string } = {
   "zero-knowledge": "bg-blue-900"
 };
 
-// Define priority categories that should appear first
+// Define priority categories that should appear first (alphabetically ordered)
 const priorityCategories = [
-  'defi',
-  'nft',
-  'infrastructure',
-  'community',
-  'ecosystem-support',
   'ai',
+  'community',
+  'defi',
   'dex',
+  'ecosystem-support',
   'game',
-  'memecoin'
+  'infrastructure',
+  'memecoin',
+  'nft'
 ];
 
 export const categorizeProjects = (projectsData: ProjectsResponse): CategorizedProjects => {
@@ -106,7 +106,8 @@ export const categorizeProjects = (projectsData: ProjectsResponse): CategorizedP
         categories[tag] = {
           title: project.profile.tags[tag],
           color: categoryColors[tag] || "bg-gray-500",
-          projects: []
+          projects: [],
+          isPriority: priorityCategories.includes(tag)
         };
       }
       if (!categories[tag].projects.find(p => p.name === project.profile.name)) {
@@ -119,25 +120,20 @@ export const categorizeProjects = (projectsData: ProjectsResponse): CategorizedP
     });
   });
 
-  // Sort categories: priority categories first, then alphabetically
+  // Sort categories: priority categories first (alphabetically), then others (alphabetically)
   return Object.fromEntries(
     Object.entries(categories)
       .sort(([keyA, valueA], [keyB, valueB]) => {
-        // Get priority indices (-1 if not in priority list)
-        const priorityA = priorityCategories.indexOf(keyA);
-        const priorityB = priorityCategories.indexOf(keyB);
+        const isPriorityA = priorityCategories.includes(keyA);
+        const isPriorityB = priorityCategories.includes(keyB);
 
-        // If both are priority categories, sort by priority order
-        if (priorityA !== -1 && priorityB !== -1) {
-          return priorityA - priorityB;
+        // If both are priority or both are not priority, sort alphabetically by title
+        if (isPriorityA === isPriorityB) {
+          return valueA.title.localeCompare(valueB.title);
         }
         
         // If only one is priority, it goes first
-        if (priorityA !== -1) return -1;
-        if (priorityB !== -1) return 1;
-        
-        // If neither is priority, sort alphabetically by title
-        return valueA.title.localeCompare(valueB.title);
+        return isPriorityA ? -1 : 1;
       })
   );
 };

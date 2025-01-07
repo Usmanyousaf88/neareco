@@ -142,6 +142,7 @@ const Index = () => {
                   color={category.color}
                   projects={category.projects}
                   onClick={() => handleCategoryClick(key)}
+                  isPriority={category.isPriority}
                 />
               ))}
           </MasonryLayout>
