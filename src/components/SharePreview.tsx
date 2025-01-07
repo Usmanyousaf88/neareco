@@ -18,7 +18,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
     const canvas = new FabricCanvas(canvasRef.current, {
       width: 1920,
       height: 1080,
-      backgroundColor: '#0A0F1C', // Dark background like the reference
+      backgroundColor: '#0A0F1C',
       selection: false,
       interactive: false,
     });
@@ -51,22 +51,36 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
     // Calculate grid layout
     const numColumns = 3;
     const numRows = Math.ceil(visibleCats.length / numColumns);
-    const cardWidth = (maxWidth - (padding * (numColumns - 1))) / numColumns;
-    const cardHeight = (maxHeight - padding * (numRows - 1)) / numRows;
     
+    // Calculate card dimensions
+    const baseCardWidth = (maxWidth - (padding * (numColumns - 1))) / numColumns;
+    const baseCardHeight = (maxHeight - (padding * (numRows - 1))) / numRows;
+
     // Draw categories and their projects
     visibleCats.forEach(([key, category], index) => {
       const row = Math.floor(index / numColumns);
       const col = index % numColumns;
       
-      const cardX = padding + (col * (cardWidth + padding));
-      const cardY = padding + titleHeight + (row * (cardHeight + padding));
+      const cardX = padding + (col * (baseCardWidth + padding));
+      const cardY = padding + titleHeight + (row * (baseCardHeight + padding));
+
+      // Calculate required height for projects
+      const projectsPerRow = 4;
+      const projectPadding = 15;
+      const projectHeight = 30;
+      const titleAreaHeight = 60; // Space for category title
+      const numProjectRows = Math.ceil(category.projects.length / projectsPerRow);
+      const requiredProjectsHeight = (numProjectRows * projectHeight) + ((numProjectRows - 1) * projectPadding);
+      const totalRequiredHeight = titleAreaHeight + requiredProjectsHeight + 40; // Adding padding
+      
+      // Use the larger of base height or required height
+      const cardHeight = Math.max(baseCardHeight, totalRequiredHeight);
 
       // Create category background
       const card = new Rect({
         left: cardX,
         top: cardY,
-        width: cardWidth,
+        width: baseCardWidth,
         height: cardHeight,
         fill: '#111827',
         rx: 8,
@@ -90,11 +104,8 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
       });
 
       // Add projects in a grid
-      const projectsPerRow = 4;
-      const projectPadding = 15;
-      const projectStartY = cardY + 70; // Start projects below category title
-      const projectWidth = (cardWidth - 40 - (projectPadding * (projectsPerRow - 1))) / projectsPerRow;
-      const projectHeight = 30;
+      const projectWidth = (baseCardWidth - 40 - (projectPadding * (projectsPerRow - 1))) / projectsPerRow;
+      const projectStartY = cardY + titleAreaHeight;
 
       category.projects.forEach((project, projectIndex) => {
         const projectRow = Math.floor(projectIndex / projectsPerRow);
