@@ -30,9 +30,10 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
       .filter(([key]) => visibleCategories[key]);
 
     // Calculate layout
-    const padding = 60;
+    const padding = 40;
+    const titleHeight = 80;
     const maxWidth = canvas.getWidth() - (padding * 2);
-    const maxHeight = canvas.getHeight() - (padding * 2);
+    const maxHeight = canvas.getHeight() - (padding * 2) - titleHeight;
     
     // Add title
     const titleText = new Text('NEAR Protocol Ecosystem Map', {
@@ -41,6 +42,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
       fontSize: 48,
       fill: '#FFFFFF',
       fontWeight: 'bold',
+      fontFamily: 'Arial',
       selectable: false,
       evented: false,
     });
@@ -50,7 +52,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
     const numColumns = 3;
     const numRows = Math.ceil(visibleCats.length / numColumns);
     const cardWidth = (maxWidth - (padding * (numColumns - 1))) / numColumns;
-    const cardHeight = (maxHeight - padding * (numRows + 1)) / numRows;
+    const cardHeight = (maxHeight - padding * (numRows - 1)) / numRows;
     
     // Draw categories and their projects
     visibleCats.forEach(([key, category], index) => {
@@ -58,7 +60,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
       const col = index % numColumns;
       
       const cardX = padding + (col * (cardWidth + padding));
-      const cardY = padding * 2.5 + (row * (cardHeight + padding));
+      const cardY = padding + titleHeight + (row * (cardHeight + padding));
 
       // Create category background
       const card = new Rect({
@@ -66,11 +68,11 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
         top: cardY,
         width: cardWidth,
         height: cardHeight,
-        fill: '#111827', // Darker card background
-        rx: 12,
-        ry: 12,
-        stroke: '#2563EB', // Blue border like in reference
-        strokeWidth: 2,
+        fill: '#111827',
+        rx: 8,
+        ry: 8,
+        stroke: '#2563EB',
+        strokeWidth: 1,
         selectable: false,
         evented: false,
       });
@@ -80,33 +82,36 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
         left: cardX + 20,
         top: cardY + 20,
         fontSize: 24,
-        fill: '#60A5FA', // Blue text like in reference
+        fill: '#60A5FA',
         fontWeight: 'bold',
+        fontFamily: 'Arial',
         selectable: false,
         evented: false,
       });
 
       // Add projects in a grid
       const projectsPerRow = 4;
-      const projectPadding = 10;
+      const projectPadding = 15;
+      const projectStartY = cardY + 70; // Start projects below category title
       const projectWidth = (cardWidth - 40 - (projectPadding * (projectsPerRow - 1))) / projectsPerRow;
-      const projectHeight = 40;
+      const projectHeight = 30;
 
       category.projects.forEach((project, projectIndex) => {
         const projectRow = Math.floor(projectIndex / projectsPerRow);
         const projectCol = projectIndex % projectsPerRow;
 
         const projectX = cardX + 20 + (projectCol * (projectWidth + projectPadding));
-        const projectY = cardY + 70 + (projectRow * (projectHeight + projectPadding));
+        const projectY = projectStartY + (projectRow * (projectHeight + projectPadding));
 
         // Add project name
         const projectText = new Text(project.name, {
           left: projectX,
           top: projectY,
-          fontSize: 16,
+          fontSize: 14,
           fill: '#FFFFFF',
+          fontFamily: 'Arial',
           width: projectWidth,
-          textAlign: 'center',
+          textAlign: 'left',
           selectable: false,
           evented: false,
         });
@@ -120,9 +125,10 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
     // Add footer with date
     const dateText = new Text(`Updated: ${new Date().toLocaleDateString()}`, {
       left: canvas.width - padding - 200,
-      top: canvas.height - padding - 30,
-      fontSize: 16,
+      top: canvas.height - padding - 20,
+      fontSize: 14,
       fill: '#6B7280',
+      fontFamily: 'Arial',
       selectable: false,
       evented: false,
     });
