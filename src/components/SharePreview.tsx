@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Canvas as FabricCanvas, Circle, Line, Text } from 'fabric';
+import { Canvas as FabricCanvas, Rect, Text } from 'fabric';
 import { CategorizedProjects } from '@/types/projects';
 
 interface SharePreviewProps {
@@ -16,8 +16,8 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
 
     // Initialize Fabric canvas
     const canvas = new FabricCanvas(canvasRef.current, {
-      width: 800,
-      height: 600,
+      width: 1200,
+      height: 800,
       backgroundColor: '#0a1929'
     });
     
@@ -27,78 +27,90 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
     const visibleCats = Object.entries(categories)
       .filter(([key]) => visibleCategories[key]);
 
-    const centerX = canvas.getWidth() / 2;
-    const centerY = canvas.getHeight() / 2;
-    const radius = Math.min(canvas.getWidth(), canvas.getHeight()) * 0.35;
+    let currentX = 40;
+    let currentY = 40;
+    const maxHeight = canvas.getHeight() - 80;
+    const maxWidth = canvas.getWidth() - 80;
 
-    // Draw categories in a circle
-    visibleCats.forEach(([key, category], index) => {
-      const angle = (index * 2 * Math.PI) / visibleCats.length;
-      const x = centerX + radius * Math.cos(angle);
-      const y = centerY + radius * Math.sin(angle);
-
-      // Draw category circle
-      const categoryCircle = new Circle({
-        left: x - 30,
-        top: y - 30,
-        radius: 30,
-        fill: category.color || '#ffffff',
-        stroke: '#ffffff',
-        strokeWidth: 2
-      });
-
-      // Add category label
+    visibleCats.forEach(([key, category]) => {
+      // Create category header
       const categoryText = new Text(category.title, {
-        left: x - 40,
-        top: y + 35,
-        fontSize: 14,
+        left: currentX,
+        top: currentY,
+        fontSize: 24,
         fill: '#ffffff',
-        textAlign: 'center',
-        width: 80
+        fontWeight: 'bold',
+        width: 200
       });
 
-      canvas.add(categoryCircle, categoryText);
+      canvas.add(categoryText);
+      currentY += 50;
 
-      // Draw projects around the category
-      const projectRadius = radius * 0.4;
-      category.projects.forEach((project, projectIndex) => {
-        const projectAngle = angle + (projectIndex * Math.PI / 8) - (Math.PI / 3);
-        const projectX = x + projectRadius * Math.cos(projectAngle);
-        const projectY = y + projectRadius * Math.sin(projectAngle);
-
-        const projectCircle = new Circle({
-          left: projectX - 15,
-          top: projectY - 15,
-          radius: 15,
-          fill: category.color || '#ffffff',
-          opacity: 0.7,
-          stroke: '#ffffff',
-          strokeWidth: 1
-        });
-
-        const projectText = new Text(project.name, {
-          left: projectX - 30,
-          top: projectY + 20,
-          fontSize: 12,
-          fill: '#ffffff',
-          textAlign: 'center',
-          width: 60
-        });
-
-        // Draw line connecting project to category
-        const line = new Line([x, y, projectX, projectY], {
-          stroke: '#ffffff',
-          strokeWidth: 1,
-          opacity: 0.3
-        });
-
-        // Add line first so it appears behind other elements
-        canvas.add(line);
-        canvas.sendObjectToBack(line);
+      // Calculate card sizes based on project content
+      const projects = category.projects.map(project => {
+        const nameLength = project.name.length;
+        const taglineLength = project.tagline?.length || 0;
         
-        // Add project circle and text
-        canvas.add(projectCircle, projectText);
+        // Adjust card size based on content
+        const width = Math.max(200, Math.min(300, nameLength * 8));
+        const height = Math.max(150, Math.min(250, taglineLength * 0.5 + 100));
+
+        return { ...project, width, height };
       });
+
+      // Arrange projects in a grid-like layout
+      projects.forEach((project, index) => {
+        if (currentX + project.width > maxWidth) {
+          currentX = 40;
+          currentY += 280; // Move to next row
+        }
+
+        if (currentY + project.height > maxHeight) {
+          currentY = 40; // Reset Y if we've reached the bottom
+          currentX = Math.min(currentX + 320, maxWidth - project.width);
+        }
+
+        // Create card background
+        const card = new Rect({
+          left: currentX,
+          top: currentY,
+          width: project.width,
+          height: project.height,
+          fill: category.color || '#ffffff',
+          opacity: 0.8,
+          rx: 10,
+          ry: 10
+        });
+
+        // Add project name
+        const nameText = new Text(project.name, {
+          left: currentX + 20,
+          top: currentY + 20,
+          fontSize: 18,
+          fill: '#ffffff',
+          fontWeight: 'bold',
+          width: project.width - 40
+        });
+
+        // Add project tagline if exists
+        if (project.tagline) {
+          const taglineText = new Text(project.tagline, {
+            left: currentX + 20,
+            top: currentY + 60,
+            fontSize: 14,
+            fill: '#ffffff',
+            width: project.width - 40,
+            lineHeight: 1.2
+          });
+          canvas.add(taglineText);
+        }
+
+        canvas.add(card, nameText);
+        currentX += project.width + 20;
+      });
+
+      currentX = 40;
+      currentY += 280; // Space between categories
     });
 
     return () => {
@@ -107,8 +119,8 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
   }, [categories, visibleCategories]);
 
   return (
-    <div className="w-full h-full flex items-center justify-center">
-      <canvas ref={canvasRef} />
+    <div className="w-full h-full flex items-center justify-center bg-gray-900 p-4">
+      <canvas ref={canvasRef} className="max-w-full shadow-xl rounded-lg" />
     </div>
   );
 };
