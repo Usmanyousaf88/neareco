@@ -17,6 +17,10 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
   useEffect(() => {
     if (!containerRef.current) return;
 
+    // Clear any existing content
+    const container = d3.select(containerRef.current);
+    container.selectAll('.category-card').remove();
+
     const width = 1920;
     const height = 1080;
     const padding = 40;
@@ -27,7 +31,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
     const availableWidth = width - (padding * 2);
     const availableHeight = height - titleHeight - footerHeight - (padding * 2);
 
-    // Use D3's treemap layout to calculate optimal sizes
+    // Use D3's treemap layout
     const treemap = d3.treemap<any>()
       .size([availableWidth, availableHeight])
       .padding(16)
@@ -44,9 +48,6 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
     treemap(root);
 
     // Apply calculated dimensions to DOM
-    const container = d3.select(containerRef.current);
-    container.selectAll('.category-card').remove();
-
     const cards = container.select('.grid-container')
       .selectAll('.category-card')
       .data(root.leaves())
@@ -64,22 +65,16 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
       const cardHeight = d.y1 - d.y0;
       const category = d.data.category;
       
-      // Calculate optimal project icon size and number of columns
       const minIconSize = 40;
       const maxIconSize = 60;
       const padding = 16;
       
-      // Calculate how many icons can fit in the width and height
       const maxColumns = Math.floor((cardWidth - padding) / (minIconSize + padding));
       const maxRows = Math.floor((cardHeight - padding - 40) / (minIconSize + padding + 20));
       
-      // Calculate maximum number of projects that can fit
       const maxProjects = maxColumns * maxRows;
-      
-      // Filter projects to only show what fits
       const visibleProjects = category.projects.slice(0, maxProjects);
       
-      // Calculate actual icon size based on available space and number of projects
       const iconSize = Math.min(
         Math.floor((cardWidth - padding * (maxColumns + 1)) / maxColumns),
         Math.floor((cardHeight - padding * (maxRows + 1) - 40) / maxRows),
@@ -115,7 +110,10 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
   }, [visibleCats]);
 
   return (
-    <div className="w-[1920px] h-[1080px] bg-[#0A0F1C] text-left" ref={containerRef}>
+    <div 
+      className="relative w-[1920px] h-[1080px] bg-[#0A0F1C] text-left overflow-hidden" 
+      ref={containerRef}
+    >
       <h1 className="text-2xl font-bold text-white p-8 pb-4">
         NEAR Protocol Ecosystem Map
       </h1>
