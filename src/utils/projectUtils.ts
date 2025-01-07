@@ -106,27 +106,19 @@ export const categorizeProjects = (projectsData: ProjectsResponse): CategorizedP
     Object.entries(project.profile.tags).forEach(([tag, value]) => {
       const normalizedTag = tag.toLowerCase().trim().replace(/\s+/g, '-');
       
-      // Special handling for Aurora-related tags
-      let finalTag = normalizedTag;
-      if (normalizedTag === 'aurora-virtual-chain' || normalizedTag === 'aurora-chain') {
-        finalTag = 'aurora-virtual-chain';
-      } else if (normalizedTag === 'aurora') {
-        finalTag = 'aurora'; // Keep Aurora projects separate
-      }
-      
-      if (!categories[finalTag]) {
-        categories[finalTag] = {
+      if (!categories[normalizedTag]) {
+        categories[normalizedTag] = {
           title: value, // Use the original tag value as the display title
-          color: categoryColors[finalTag] || "bg-gray-500",
+          color: categoryColors[normalizedTag] || "bg-gray-500",
           projects: [],
-          isPriority: priorityCategories.includes(finalTag)
+          isPriority: priorityCategories.includes(normalizedTag)
         };
       }
       
       // Only add the project if it's not already in the category
-      const existingProject = categories[finalTag].projects.find(p => p.name === project.profile.name);
+      const existingProject = categories[normalizedTag].projects.find(p => p.name === project.profile.name);
       if (!existingProject) {
-        categories[finalTag].projects.push({
+        categories[normalizedTag].projects.push({
           name: project.profile.name,
           image: project.profile.image.url,
           tagline: project.profile.tagline
