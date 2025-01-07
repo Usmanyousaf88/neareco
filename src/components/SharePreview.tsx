@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { CategorizedProjects } from '@/types/projects';
 import * as d3 from 'd3';
-import EcosystemMap3D from './EcosystemMap3D';
 
 interface SharePreviewProps {
   categories: CategorizedProjects;
