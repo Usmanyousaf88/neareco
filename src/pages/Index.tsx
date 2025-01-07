@@ -114,7 +114,12 @@ const Index = () => {
 
     const categories: { [key: string]: { title: string; color: string; projects: any[] } } = {};
 
-    Object.values(projectsData).forEach((project) => {
+    // Sort projects by size to help with even distribution
+    const sortedProjects = Object.values(projectsData).sort((a, b) => 
+      Object.keys(b.profile.tags).length - Object.keys(a.profile.tags).length
+    );
+
+    sortedProjects.forEach((project) => {
       Object.keys(project.profile.tags).forEach((tag) => {
         if (!categories[tag]) {
           categories[tag] = {
@@ -133,7 +138,10 @@ const Index = () => {
       });
     });
 
-    return categories;
+    // Sort categories by number of projects to help with distribution
+    return Object.fromEntries(
+      Object.entries(categories).sort((a, b) => b[1].projects.length - a[1].projects.length)
+    );
   }, [projectsData]);
 
   const handleCategoryClick = (key: string) => {
@@ -185,11 +193,11 @@ const Index = () => {
           {`
             .masonry-grid {
               display: flex;
-              width: 100%;
-              margin-left: -16px; /* gutter size offset */
+              width: auto;
+              margin-left: -16px;
             }
             .masonry-grid_column {
-              padding-left: 16px; /* gutter size */
+              padding-left: 16px;
               background-clip: padding-box;
             }
             .masonry-grid_column > div {
