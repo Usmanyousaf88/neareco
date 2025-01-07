@@ -26,10 +26,18 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
     const canvas = new FabricCanvas(canvasRef.current, {
       width: 1920,
       height: 1080,
-      backgroundColor: '#0a1929'
+      backgroundColor: '#0a1929',
+      selection: false, // Disable group selection
+      interactive: false, // Disable all interactions
     });
     
     fabricCanvasRef.current = canvas;
+
+    // Disable all interactive features
+    canvas.forEachObject((obj) => {
+      obj.selectable = false;
+      obj.evented = false;
+    });
 
     // Draw visible categories and their projects
     const visibleCats = Object.entries(categories)
@@ -48,7 +56,9 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
         fontSize: 36,
         fill: '#ffffff',
         fontWeight: 'bold',
-        width: 300
+        width: 300,
+        selectable: false,
+        evented: false,
       });
 
       canvas.add(categoryText);
@@ -61,7 +71,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
         
         // Base card size with 16:9 aspect ratio
         const width = Math.max(320, Math.min(480, nameLength * 10));
-        const height = width * (9/16); // Maintain 16:9 aspect ratio
+        const height = width * (9/16);
 
         return { 
           ...project, 
@@ -75,7 +85,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
       projects.forEach(async (project) => {
         if (currentX + project.width > maxWidth) {
           currentX = 60;
-          currentY += project.height + 40; // Add spacing between rows
+          currentY += project.height + 40;
         }
 
         if (currentY + project.height > maxHeight) {
@@ -92,6 +102,8 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
           fill: category.color || '#1a2e3b',
           rx: 12,
           ry: 12,
+          selectable: false,
+          evented: false,
           shadow: new Shadow({
             color: 'rgba(0,0,0,0.3)',
             blur: 10,
@@ -103,7 +115,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
         // Load and add project image
         const addImage = () => {
           return new Promise<void>((resolve) => {
-            Image.fromURL(project.imageUrl, (img: any) => {
+            Image.fromURL(project.imageUrl, (img) => {
               img.scaleToWidth(project.width);
               const scaledHeight = img.getScaledHeight();
               if (scaledHeight > project.height * 0.6) {
@@ -113,6 +125,8 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
               img.set({
                 left: currentX,
                 top: currentY,
+                selectable: false,
+                evented: false,
                 clipPath: new Rect({
                   width: project.width,
                   height: project.height * 0.6,
@@ -139,7 +153,9 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
           fontSize: 24,
           fill: '#ffffff',
           fontWeight: 'bold',
-          width: project.width - 40
+          width: project.width - 40,
+          selectable: false,
+          evented: false,
         });
 
         // Add project tagline if exists
@@ -151,17 +167,19 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
             fill: '#ffffff',
             width: project.width - 40,
             lineHeight: 1.2,
-            opacity: 0.8
+            opacity: 0.8,
+            selectable: false,
+            evented: false,
           });
           canvas.add(taglineText);
         }
 
         canvas.add(card, nameText);
-        currentX += project.width + 40; // Add spacing between cards
+        currentX += project.width + 40;
       });
 
       currentX = 60;
-      currentY += 320; // Space between categories
+      currentY += 320;
     });
 
     return () => {
