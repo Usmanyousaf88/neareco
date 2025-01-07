@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useToast } from "@/hooks/use-toast";
 
 const categories = {
   defi: {
@@ -67,6 +68,30 @@ const categories = {
 
 const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  const handleCategoryClick = (key: string) => {
+    try {
+      setSelectedCategory(key);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load category details. Please try again.",
+        variant: "destructive",
+      });
+      console.error("Error selecting category:", error);
+    }
+  };
+
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    const img = e.target as HTMLImageElement;
+    img.src = "/placeholder.svg"; // Fallback image
+    toast({
+      title: "Image Load Error",
+      description: "Failed to load project image. Using placeholder instead.",
+      variant: "destructive",
+    });
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white p-8">
@@ -79,7 +104,7 @@ const Index = () => {
               key={key}
               className={`${category.color} rounded-lg p-6 cursor-pointer transform transition-all duration-300 hover:scale-105`}
               whileHover={{ y: -5 }}
-              onClick={() => setSelectedCategory(key)}
+              onClick={() => handleCategoryClick(key)}
             >
               <h2 className="text-2xl font-bold mb-4">{category.title}</h2>
               <div className="grid grid-cols-2 gap-4">
@@ -89,6 +114,7 @@ const Index = () => {
                       src={project.image}
                       alt={project.name}
                       className="w-12 h-12 rounded-full mb-2 bg-white p-1"
+                      onError={handleImageError}
                     />
                     <span className="text-sm text-center">{project.name}</span>
                   </div>
@@ -114,6 +140,7 @@ const Index = () => {
                     src={project.image}
                     alt={project.name}
                     className="w-16 h-16 rounded-full mb-2 bg-white p-1"
+                    onError={handleImageError}
                   />
                   <span className="text-sm text-center">{project.name}</span>
                 </div>
