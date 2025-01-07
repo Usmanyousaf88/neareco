@@ -30,17 +30,17 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
     const availableWidth = width - (padding * 2);
     const availableHeight = height - titleHeight - (padding * 2);
 
-    // Use D3's treemap layout
+    // Use D3's treemap layout with more padding for titles
     const treemap = d3.treemap<any>()
       .size([availableWidth, availableHeight])
-      .padding(24)
+      .padding(32)  // Increased padding between cards
       .round(true);
 
     const root = d3.hierarchy({
       children: visibleCats.map(([key, category]) => ({
         key,
         category,
-        value: category.projects.length
+        value: category.projects.length + 2 // Add padding for title space
       }))
     }).sum(d => d.value || 0);
 
@@ -63,31 +63,31 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
       const cardHeight = d.y1 - d.y0;
       const category = d.data.category;
       
-      const minIconSize = 72;
-      const maxIconSize = 96;
-      const padding = 24;
+      const minIconSize = 64;  // Reduced minimum icon size
+      const maxIconSize = 88;  // Reduced maximum icon size
+      const padding = 16;      // Reduced padding
       
       // Calculate grid dimensions with more space for text
-      const maxColumns = Math.floor((cardWidth - padding * 2) / (minIconSize + padding + 48));
-      const maxRows = Math.floor((cardHeight - padding * 2 - 80) / (minIconSize + padding + 32));
+      const maxColumns = Math.floor((cardWidth - padding * 2) / (minIconSize + padding + 32));
+      const maxRows = Math.floor((cardHeight - padding * 2 - 64) / (minIconSize + padding + 24));
       
       const maxProjects = maxColumns * maxRows;
       const visibleProjects = category.projects.slice(0, maxProjects);
       
       const iconSize = Math.min(
-        Math.floor((cardWidth - padding * (maxColumns + 1)) / maxColumns) - 48,
-        Math.floor((cardHeight - padding * (maxRows + 1) - 80) / maxRows) - 32,
+        Math.floor((cardWidth - padding * (maxColumns + 1)) / maxColumns) - 32,
+        Math.floor((cardHeight - padding * (maxRows + 1) - 64) / maxRows) - 24,
         maxIconSize
       );
 
       card.html(`
-        <div class="h-full bg-[#111827] border border-[#1d4ed8] rounded-xl p-6 flex flex-col">
-          <h2 class="text-2xl font-semibold text-[#60a5fa] mb-6 line-clamp-1">
+        <div class="h-full bg-[#111827] border border-[#1d4ed8] rounded-xl p-4 flex flex-col">
+          <h2 class="text-xl font-semibold text-[#60a5fa] mb-4 line-clamp-1">
             ${category.title}
           </h2>
-          <div class="grid gap-6" style="grid-template-columns: repeat(auto-fill, minmax(${iconSize + 48}px, 1fr));">
+          <div class="grid gap-4" style="grid-template-columns: repeat(auto-fill, minmax(${iconSize + 32}px, 1fr));">
             ${visibleProjects.map(project => `
-              <div class="flex flex-col items-center gap-3">
+              <div class="flex flex-col items-center gap-2">
                 <div class="rounded-full bg-gray-800 overflow-hidden flex items-center justify-center"
                      style="width: ${iconSize}px; height: ${iconSize}px">
                   <img
@@ -97,7 +97,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
                     onerror="this.src='/placeholder.svg'"
                   />
                 </div>
-                <span class="text-white text-sm text-center w-full px-2 max-w-[${iconSize + 32}px] line-clamp-2" title="${project.name}">
+                <span class="text-white text-xs text-center w-full px-1 max-w-[${iconSize + 24}px] line-clamp-2" title="${project.name}">
                   ${project.name}
                 </span>
               </div>
