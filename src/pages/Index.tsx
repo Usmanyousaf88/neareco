@@ -5,6 +5,7 @@ import CategoryCard from '@/components/CategoryCard';
 import ProjectsGrid from '@/components/ProjectsGrid';
 import MasonryLayout from '@/components/MasonryLayout';
 import { categorizeProjects } from '@/utils/projectUtils';
+import { fetchProjects } from '@/utils/api';
 import type { ProjectsResponse } from '@/types/projects';
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
