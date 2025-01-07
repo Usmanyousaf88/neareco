@@ -1,5 +1,4 @@
-import React, { useEffect, useRef } from 'react';
-import { Canvas as FabricCanvas, Rect, Text } from 'fabric';
+import React from 'react';
 import { CategorizedProjects } from '@/types/projects';
 
 interface SharePreviewProps {
@@ -8,151 +7,53 @@ interface SharePreviewProps {
 }
 
 const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const fabricCanvasRef = useRef<FabricCanvas | null>(null);
-
-  useEffect(() => {
-    if (!canvasRef.current) return;
-
-    // Initialize Fabric canvas with 16:9 aspect ratio
-    const canvas = new FabricCanvas(canvasRef.current, {
-      width: 1920,
-      height: 1080,
-      backgroundColor: '#0A0F1C',
-      selection: false,
-      interactive: false,
-    });
-    
-    fabricCanvasRef.current = canvas;
-
-    // Get visible categories
-    const visibleCats = Object.entries(categories)
-      .filter(([key]) => visibleCategories[key]);
-
-    // Calculate layout
-    const padding = 40;
-    const titleHeight = 80;
-    const maxWidth = canvas.getWidth() - (padding * 2);
-    const maxHeight = canvas.getHeight() - (padding * 2) - titleHeight;
-    
-    // Add title
-    const titleText = new Text('NEAR Protocol Ecosystem Map', {
-      left: padding,
-      top: padding,
-      fontSize: 48,
-      fill: '#FFFFFF',
-      fontWeight: 'bold',
-      fontFamily: 'Arial',
-      selectable: false,
-      evented: false,
-    });
-    canvas.add(titleText);
-
-    // Calculate grid layout
-    const numColumns = 3;
-    const numRows = Math.ceil(visibleCats.length / numColumns);
-    
-    // Calculate card dimensions
-    const baseCardWidth = (maxWidth - (padding * (numColumns - 1))) / numColumns;
-    const baseCardHeight = (maxHeight - (padding * (numRows - 1))) / numRows;
-
-    // Draw categories and their projects
-    visibleCats.forEach(([key, category], index) => {
-      const row = Math.floor(index / numColumns);
-      const col = index % numColumns;
-      
-      const cardX = padding + (col * (baseCardWidth + padding));
-      const cardY = padding + titleHeight + (row * (baseCardHeight + padding));
-
-      // Calculate required height for projects
-      const projectsPerRow = 4;
-      const projectPadding = 15;
-      const projectHeight = 30;
-      const titleAreaHeight = 60; // Space for category title
-      const numProjectRows = Math.ceil(category.projects.length / projectsPerRow);
-      const requiredProjectsHeight = (numProjectRows * projectHeight) + ((numProjectRows - 1) * projectPadding);
-      const totalRequiredHeight = titleAreaHeight + requiredProjectsHeight + 40; // Adding padding
-      
-      // Use the larger of base height or required height
-      const cardHeight = Math.max(baseCardHeight, totalRequiredHeight);
-
-      // Create category background
-      const card = new Rect({
-        left: cardX,
-        top: cardY,
-        width: baseCardWidth,
-        height: cardHeight,
-        fill: '#111827',
-        rx: 8,
-        ry: 8,
-        stroke: '#2563EB',
-        strokeWidth: 1,
-        selectable: false,
-        evented: false,
-      });
-
-      // Add category title
-      const categoryTitle = new Text(category.title, {
-        left: cardX + 20,
-        top: cardY + 20,
-        fontSize: 24,
-        fill: '#60A5FA',
-        fontWeight: 'bold',
-        fontFamily: 'Arial',
-        selectable: false,
-        evented: false,
-      });
-
-      // Add projects in a grid
-      const projectWidth = (baseCardWidth - 40 - (projectPadding * (projectsPerRow - 1))) / projectsPerRow;
-      const projectStartY = cardY + titleAreaHeight;
-
-      category.projects.forEach((project, projectIndex) => {
-        const projectRow = Math.floor(projectIndex / projectsPerRow);
-        const projectCol = projectIndex % projectsPerRow;
-
-        const projectX = cardX + 20 + (projectCol * (projectWidth + projectPadding));
-        const projectY = projectStartY + (projectRow * (projectHeight + projectPadding));
-
-        // Add project name
-        const projectText = new Text(project.name, {
-          left: projectX,
-          top: projectY,
-          fontSize: 14,
-          fill: '#FFFFFF',
-          fontFamily: 'Arial',
-          width: projectWidth,
-          textAlign: 'left',
-          selectable: false,
-          evented: false,
-        });
-
-        canvas.add(projectText);
-      });
-
-      canvas.add(card, categoryTitle);
-    });
-
-    // Add footer with date
-    const dateText = new Text(`Updated: ${new Date().toLocaleDateString()}`, {
-      left: canvas.width - padding - 200,
-      top: canvas.height - padding - 20,
-      fontSize: 14,
-      fill: '#6B7280',
-      fontFamily: 'Arial',
-      selectable: false,
-      evented: false,
-    });
-    canvas.add(dateText);
-
-    return () => {
-      canvas.dispose();
-    };
-  }, [categories, visibleCategories]);
+  const visibleCats = Object.entries(categories)
+    .filter(([key]) => visibleCategories[key])
+    .sort((a, b) => a[1].title.localeCompare(b[1].title));
 
   return (
-    <div className="w-full h-full flex items-center justify-center bg-gray-900 p-4">
-      <canvas ref={canvasRef} className="max-w-full h-auto shadow-xl rounded-lg" />
+    <div className="w-[1920px] h-[1080px] bg-[#0A0F1C] p-10 text-left">
+      {/* Title */}
+      <h1 className="text-4xl font-bold text-white mb-8">
+        NEAR Protocol Ecosystem Map
+      </h1>
+
+      {/* Grid Container */}
+      <div className="grid grid-cols-3 gap-8 mt-4">
+        {visibleCats.map(([key, category]) => (
+          <div
+            key={key}
+            className="bg-[#111827] border border-blue-500 rounded-lg p-6 flex flex-col"
+            style={{
+              minHeight: '100px',
+              height: 'fit-content'
+            }}
+          >
+            {/* Category Title */}
+            <h2 className="text-2xl font-semibold text-blue-400 mb-6">
+              {category.title}
+            </h2>
+
+            {/* Projects Grid */}
+            <div className="grid grid-cols-4 gap-4">
+              {category.projects.map((project, index) => (
+                <div
+                  key={`${key}-${index}`}
+                  className="text-white text-sm truncate"
+                  title={project.name}
+                >
+                  {project.name}
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Footer */}
+      <div className="absolute bottom-10 right-10 text-gray-500 text-sm">
+        Updated: {new Date().toLocaleDateString()}
+      </div>
     </div>
   );
 };

@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import React, { useState, useRef } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Download, Copy, ZoomIn, ZoomOut, Twitter } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import html2canvas from 'html2canvas';
 import SharePreview from './SharePreview';
 import { CategorizedProjects } from '@/types/projects';
 
@@ -16,48 +17,44 @@ interface ShareDialogProps {
 const ShareDialog = ({ open, onOpenChange, categories, visibleCategories }: ShareDialogProps) => {
   const { toast } = useToast();
   const [zoom, setZoom] = useState(1);
+  const previewRef = useRef<HTMLDivElement>(null);
 
-  const getCanvas = (): HTMLCanvasElement | null => {
-    return document.querySelector('#share-preview canvas');
+  const capturePreview = async () => {
+    if (!previewRef.current) return null;
+    
+    try {
+      const canvas = await html2canvas(previewRef.current, {
+        scale: 2,
+        backgroundColor: '#0A0F1C',
+        logging: false,
+      });
+      return canvas;
+    } catch (error) {
+      console.error('Failed to capture preview:', error);
+      return null;
+    }
   };
 
   const handleCopy = async () => {
     try {
-      const canvas = getCanvas();
-      if (!canvas) {
-        throw new Error('Canvas not found');
-      }
+      const canvas = await capturePreview();
+      if (!canvas) throw new Error('Failed to capture preview');
 
-      // First try the newer ClipboardItem API
-      try {
-        const blob = await new Promise<Blob>((resolve, reject) => {
-          canvas.toBlob((blob) => {
-            if (blob) {
-              resolve(blob);
-            } else {
-              reject(new Error('Failed to create blob'));
-            }
-          }, 'image/png');
-        });
+      const blob = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob((blob) => {
+          if (blob) resolve(blob);
+          else reject(new Error('Failed to create blob'));
+        }, 'image/png');
+      });
 
-        await navigator.clipboard.write([
-          new ClipboardItem({ 'image/png': blob })
-        ]);
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': blob })
+      ]);
 
-        toast({
-          title: "Copied!",
-          description: "Image copied to clipboard",
-        });
-      } catch (clipboardError) {
-        // Fallback to copying canvas data URL
-        const dataUrl = canvas.toDataURL('image/png');
-        await navigator.clipboard.writeText(dataUrl);
-        
-        toast({
-          title: "Copied!",
-          description: "Image URL copied to clipboard",
-        });
-      }
+      toast({
+        title: "Copied!",
+        description: "Image copied to clipboard",
+      });
     } catch (error) {
       console.error('Copy failed:', error);
       toast({
@@ -70,10 +67,8 @@ const ShareDialog = ({ open, onOpenChange, categories, visibleCategories }: Shar
 
   const handleDownload = async () => {
     try {
-      const canvas = getCanvas();
-      if (!canvas) {
-        throw new Error('Canvas not found');
-      }
+      const canvas = await capturePreview();
+      if (!canvas) throw new Error('Failed to capture preview');
 
       const link = document.createElement('a');
       link.download = 'near-ecosystem-map.png';
@@ -122,12 +117,16 @@ const ShareDialog = ({ open, onOpenChange, categories, visibleCategories }: Shar
       <DialogContent className="max-w-[90vw] max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>Share Preview</DialogTitle>
+          <DialogDescription>
+            Create and share an image of your NEAR ecosystem map
+          </DialogDescription>
         </DialogHeader>
+        
         <div className="flex flex-col gap-4 flex-grow min-h-0">
           <div className="relative bg-gray-900 rounded-lg overflow-auto flex-grow min-h-0">
             <div 
-              id="share-preview"
-              className="origin-top-left transition-transform duration-200 ease-out h-full"
+              ref={previewRef}
+              className="origin-top-left transition-transform duration-200 ease-out"
               style={{ transform: `scale(${zoom})` }}
             >
               <SharePreview 
@@ -136,6 +135,7 @@ const ShareDialog = ({ open, onOpenChange, categories, visibleCategories }: Shar
               />
             </div>
           </div>
+          
           <div className="flex gap-2 justify-between items-center">
             <div className="flex gap-2">
               <Button onClick={handleZoomOut} variant="outline" size="icon">
