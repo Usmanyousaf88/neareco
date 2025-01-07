@@ -114,7 +114,7 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
         NEAR Protocol Ecosystem Map
       </h1>
       
-      <div className="grid-container absolute inset-0 pt-[60px] pb-[30px] px-[40px]">
+      <div className="grid-container absolute inset-0 pt-[60px] pb-[30px] px-[40px] h-[calc(100%-90px)]">
         {/* D3 will inject content here */}
       </div>
 
