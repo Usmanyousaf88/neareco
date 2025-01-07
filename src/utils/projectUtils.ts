@@ -69,10 +69,20 @@ export const categoryColors: { [key: string]: string } = {
   "zero-knowledge": "bg-blue-900"
 };
 
+// Define priority categories that should appear first
+const priorityCategories = [
+  'dapp',
+  'defi',
+  'nft',
+  'infrastructure',
+  'community',
+  'ecosystem-support'
+];
+
 export const categorizeProjects = (projectsData: ProjectsResponse): CategorizedProjects => {
   const categories: CategorizedProjects = {};
 
-  // First, calculate total projects per tag for better distribution
+  // Calculate total projects per tag for better distribution
   const tagCounts = new Map<string, number>();
   Object.values(projectsData).forEach((project) => {
     Object.keys(project.profile.tags).forEach((tag) => {
@@ -85,12 +95,9 @@ export const categorizeProjects = (projectsData: ProjectsResponse): CategorizedP
     Object.keys(b.profile.tags).length - Object.keys(a.profile.tags).length
   );
 
-  // Distribute projects evenly across categories
+  // Distribute projects across categories
   sortedProjects.forEach((project) => {
-    // Sort tags by count to prioritize smaller categories
-    const projectTags = Object.keys(project.profile.tags)
-      .sort((a, b) => (tagCounts.get(a) || 0) - (tagCounts.get(b) || 0));
-
+    const projectTags = Object.keys(project.profile.tags);
     projectTags.forEach((tag) => {
       if (!categories[tag]) {
         categories[tag] = {
@@ -109,9 +116,25 @@ export const categorizeProjects = (projectsData: ProjectsResponse): CategorizedP
     });
   });
 
-  // Sort categories by size for better visual distribution
+  // Sort categories: priority categories first, then alphabetically
   return Object.fromEntries(
     Object.entries(categories)
-      .sort((a, b) => Math.abs(5 - a[1].projects.length) - Math.abs(5 - b[1].projects.length))
+      .sort(([keyA, valueA], [keyB, valueB]) => {
+        // Get priority indices (-1 if not in priority list)
+        const priorityA = priorityCategories.indexOf(keyA);
+        const priorityB = priorityCategories.indexOf(keyB);
+
+        // If both are priority categories, sort by priority order
+        if (priorityA !== -1 && priorityB !== -1) {
+          return priorityA - priorityB;
+        }
+        
+        // If only one is priority, it goes first
+        if (priorityA !== -1) return -1;
+        if (priorityB !== -1) return 1;
+        
+        // If neither is priority, sort alphabetically by title
+        return valueA.title.localeCompare(valueB.title);
+      })
   );
 };
