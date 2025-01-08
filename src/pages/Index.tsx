@@ -86,7 +86,7 @@ const Index = () => {
       // Switching to featured only
       const updatedVisibility = { ...visibleCategories };
       Object.entries(categorizedProjects).forEach(([key, category]) => {
-        updatedVisibility[key] = category.isPriority || key === 'aurora-virtual-chain';
+        updatedVisibility[key] = category.isPriority
       });
       setVisibleCategories(updatedVisibility);
     } else {

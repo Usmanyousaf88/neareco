@@ -14,16 +14,12 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
     .filter(([key]) => visibleCategories[key])
     .sort((a, b) => a[1].title.localeCompare(b[1].title));
 
-  console.log('Rendering SharePreview with visible categories:', visibleCats.map(([key]) => key));
-
   useEffect(() => {
     if (!containerRef.current) return;
 
     // Clear any existing content
     const container = d3.select(containerRef.current);
     container.selectAll('.category-card').remove();
-
-    console.log('Rendering categories:', visibleCats);
 
     const width = 3840;
     const height = 2160;

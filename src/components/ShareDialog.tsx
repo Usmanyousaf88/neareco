@@ -63,7 +63,14 @@ const ShareDialog = ({ open, onOpenChange, categories, visibleCategories }: Shar
   };
 
   const handleCopy = async () => {
+    const pendingToast = toast({
+      title: "Copying...",
+      description: "Preparing image for clipboard",
+    });
+
     try {
+      window.focus();
+      
       const canvas = await capturePreview();
       if (!canvas) throw new Error('Failed to capture preview');
 
@@ -78,16 +85,29 @@ const ShareDialog = ({ open, onOpenChange, categories, visibleCategories }: Shar
       await navigator.clipboard.write([data]);
 
       toast({
+        id: pendingToast.id,
         title: "Copied!",
         description: "Image copied to clipboard",
       });
     } catch (error) {
       console.error('Copy failed:', error);
-      toast({
-        title: "Error",
-        description: "Failed to copy image. Try downloading instead.",
-        variant: "destructive",
-      });
+      
+      // Check if it's a permission error
+      if (error instanceof Error && error.name === 'NotAllowedError') {
+        toast({
+          id: pendingToast.id,
+          title: "Permission Denied",
+          description: "Please allow clipboard access in your browser settings to copy images.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          id: pendingToast.id,
+          title: "Error",
+          description: "Failed to copy image. Try downloading instead.",
+          variant: "destructive",
+        });
+      }
     }
   };
 

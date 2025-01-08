@@ -1,11 +1,10 @@
-import { Project, ProjectsResponse, CategorizedProjects } from '@/types/projects';
+import { ProjectsResponse, CategorizedProjects } from "@/types/projects";
 
 export const categoryColors: { [key: string]: string } = {
   community: "bg-violet-600",
   dapp: "bg-blue-600",
   defi: "bg-indigo-600",
   dex: "bg-purple-600",
-  "ecosystem-support": "bg-green-600",
   infrastructure: "bg-emerald-600",
   launchpad: "bg-pink-600",
   nft: "bg-fuchsia-600",
@@ -66,25 +65,26 @@ export const categoryColors: { [key: string]: string } = {
   storage: "bg-teal-800",
   validator: "bg-cyan-800",
   wallet: "bg-sky-800",
-  "zero-knowledge": "bg-blue-900"
+  "zero-knowledge": "bg-blue-900",
 };
 
 const priorityCategories = [
-  'ai',
-  'aurora-virtual-chain',
-  'borrowing-lending',
-  'dex',
-  'ecosystem-support',
-  'education',
-  'game',
-  'launchpad',
-  'liquid-staking',
-  'memecoin',
-  'nft',
-  'wallet'
+  "ai",
+  "aurora-virtual-chain",
+  "borrowing-lending",
+  "dex",
+  "education",
+  "game",
+  "launchpad",
+  "liquid-staking",
+  "memecoin",
+  "nft",
+  "wallet",
 ];
 
-export const categorizeProjects = (projectsData: ProjectsResponse): CategorizedProjects => {
+export const categorizeProjects = (
+  projectsData: ProjectsResponse
+): CategorizedProjects => {
   const categories: CategorizedProjects = {};
 
   // Calculate total projects per tag for better distribution
@@ -96,35 +96,32 @@ export const categorizeProjects = (projectsData: ProjectsResponse): CategorizedP
   });
 
   // Sort projects by number of tags to help with distribution
-  const sortedProjects = Object.entries(projectsData).sort(([, a], [, b]) => 
-    Object.keys(b.profile.tags).length - Object.keys(a.profile.tags).length
+  const sortedProjects = Object.entries(projectsData).sort(
+    ([, a], [, b]) =>
+      Object.keys(b.profile.tags).length - Object.keys(a.profile.tags).length
   );
 
   // Distribute projects across categories
   sortedProjects.forEach(([projectId, project]) => {
     Object.entries(project.profile.tags).forEach(([tag, value]) => {
-      // Add specific logging for aurora-virtual-chain
-      if (tag === 'aurora-virtual-chain') {
-        console.log('Found aurora-virtual-chain project:', project.profile.name);
-        console.log('Project tags:', project.profile.tags);
-      }
-      
       if (!categories[tag]) {
         categories[tag] = {
           title: value,
           color: categoryColors[tag] || "bg-gray-500",
           projects: [],
-          isPriority: priorityCategories.includes(tag)
+          isPriority: priorityCategories.includes(tag),
         };
       }
-      
+
       // Only add the project if it's not already in the category
-      const existingProject = categories[tag].projects.find(p => p.name === project.profile.name);
+      const existingProject = categories[tag].projects.find(
+        (p) => p.name === project.profile.name
+      );
       if (!existingProject) {
         categories[tag].projects.push({
           name: project.profile.name,
           image: project.profile.image.url,
-          tagline: project.profile.tagline
+          tagline: project.profile.tagline,
         });
       }
     });
@@ -132,16 +129,15 @@ export const categorizeProjects = (projectsData: ProjectsResponse): CategorizedP
 
   // Sort categories: priority categories first (alphabetically), then others (alphabetically)
   return Object.fromEntries(
-    Object.entries(categories)
-      .sort(([keyA, valueA], [keyB, valueB]) => {
-        const isPriorityA = priorityCategories.includes(keyA);
-        const isPriorityB = priorityCategories.includes(keyB);
+    Object.entries(categories).sort(([keyA, valueA], [keyB, valueB]) => {
+      const isPriorityA = priorityCategories.includes(keyA);
+      const isPriorityB = priorityCategories.includes(keyB);
 
-        if (isPriorityA === isPriorityB) {
-          return valueA.title.localeCompare(valueB.title);
-        }
-        
-        return isPriorityA ? -1 : 1;
-      })
+      if (isPriorityA === isPriorityB) {
+        return valueA.title.localeCompare(valueB.title);
+      }
+
+      return isPriorityA ? -1 : 1;
+    })
   );
 };
