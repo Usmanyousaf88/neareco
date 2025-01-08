@@ -1,11 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-
-interface Project {
-  name: string;
-  image: string;
-  description?: string;
-}
+import { Project } from '@/types/projects';
 
 interface ProjectsGridProps {
   title: string;
@@ -22,7 +17,7 @@ const ProjectsGrid = ({ title, projects }: ProjectsGridProps) => {
       <h3 className="text-2xl font-bold mb-4">{title}</h3>
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 auto-rows-min">
         {projects.map((project) => (
-          <div key={project.name} className="flex flex-col items-center min-h-[120px]">
+          <div key={project.id} className="flex flex-col items-center min-h-[120px]">
             <img
               src={project.image}
               alt={project.name}

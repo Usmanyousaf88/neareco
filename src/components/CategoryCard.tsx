@@ -1,13 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from '@remix-run/react';
-
-interface Project {
-  name: string;
-  image: string;
-  description?: string;
-  links?: string[];
-}
+import { Project } from '@/types/projects';
 
 interface CategoryCardProps {
   title: string;

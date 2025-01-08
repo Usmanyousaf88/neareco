@@ -1,17 +1,12 @@
+import { useState, useEffect, useRef } from 'react';
 import { json, LoaderFunction } from "@remix-run/cloudflare";
 import { useLoaderData, Link } from "@remix-run/react";
-import { Fragment } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { getCategories } from "@/utils/projectUtils";
-import { CategorizedProjects, ProjectDetails } from "@/types/projects";
+import { Project, ProjectDetails } from "@/types/projects";
 import { 
-  ExternalLink, 
   Github, 
-  Twitter, 
-  MessageCircle, 
-  MessagesSquare,
-  BookOpen,
   Globe,
   PlayCircle,
   ArrowLeft
@@ -45,13 +40,9 @@ interface LoaderData {
   category: {
     title: string;
     color: string;
-    projects: Array<{
-      name: string;
-      image: string;
-      description?: string;
-      details?: ProjectDetails;
-    }>;
+    projects: Project[];
     isPriority: boolean;
+    remainingProjects: Project[];
   };
 }
 
@@ -74,9 +65,10 @@ export const loader: LoaderFunction = async ({ params }) => {
     throw new Response("Category not found", { status: 404 });
   }
 
-  // Fetch details for each project
+  // Only fetch details for first 10 projects
+  const initialProjects = category.projects.slice(0, 10);
   const projectsWithDetails = await Promise.all(
-    category.projects.map(async (project) => {
+    initialProjects.map(async (project) => {
       const details = await getProjectDetails(project.id);
       return { ...project, details };
     })
@@ -86,12 +78,76 @@ export const loader: LoaderFunction = async ({ params }) => {
     category: {
       ...category,
       projects: projectsWithDetails,
+      // Send remaining projects without details
+      remainingProjects: category.projects.slice(10),
     },
   });
 };
 
 export default function CategoryPage() {
   const { category } = useLoaderData<LoaderData>();
+  const [displayedProjects, setDisplayedProjects] = useState(category.projects);
+  const [remainingProjects, setRemainingProjects] = useState(category.remainingProjects || []);
+  const [hasMore, setHasMore] = useState(category.remainingProjects?.length > 0);
+  const [isLoading, setIsLoading] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Reset state when category changes
+  useEffect(() => {
+    setDisplayedProjects(category.projects);
+    setRemainingProjects(category.remainingProjects || []);
+    setHasMore(category.remainingProjects?.length > 0);
+  }, [category.title]);
+
+  const loadMore = async () => {
+    if (isLoading || !hasMore) return;
+    
+    setIsLoading(true);
+    const nextBatch = remainingProjects.slice(0, 10);
+    
+    try {
+      // Fetch details for next batch
+      const projectsWithDetails = await Promise.all(
+        nextBatch.map(async (project) => {
+          const details = await getProjectDetails(project.id);
+          return { ...project, details };
+        })
+      );
+
+      setDisplayedProjects(prev => [...prev, ...projectsWithDetails]);
+      setRemainingProjects(prev => prev.slice(10));
+      setHasMore(remainingProjects.length > 10);
+    } catch (error) {
+      console.error('Error loading more projects:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const target = entries[0];
+        if (target.isIntersecting && hasMore && !isLoading) {
+          loadMore();
+        }
+      },
+      {
+        rootMargin: '100px',
+      }
+    );
+
+    const container = containerRef.current;
+    if (container) {
+      observer.observe(container);
+    }
+
+    return () => {
+      if (container) {
+        observer.unobserve(container);
+      }
+    };
+  }, [hasMore, isLoading]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white p-8">
@@ -114,7 +170,7 @@ export default function CategoryPage() {
         </div>
 
         <div className="grid gap-6">
-          {category.projects.map((project) => (
+          {displayedProjects.map((project) => (
             <div 
               key={project.name}
               className="bg-gray-800/80 backdrop-blur-sm border border-white/10 shadow-xl rounded-lg p-6 flex gap-6 items-start hover:bg-gray-800/90 transition-colors"
@@ -306,6 +362,14 @@ export default function CategoryPage() {
               </div>
             </div>
           ))}
+          {hasMore && (
+            <div 
+              ref={containerRef} 
+              className="h-20 flex items-center justify-center text-white/60"
+            >
+              Loading more projects...
+            </div>
+          )}
         </div>
       </div>
     </div>
