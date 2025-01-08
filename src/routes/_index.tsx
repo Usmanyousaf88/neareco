@@ -1,6 +1,6 @@
 import type { MetaFunction, LoaderFunction } from "@remix-run/cloudflare";
 import { useLoaderData } from "@remix-run/react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from 'framer-motion';
 import { getCategories } from "@/utils/projectUtils";
 import CategoryCard from "@/components/CategoryCard";
@@ -8,7 +8,23 @@ import ShareDialog from "@/components/ShareDialog";
 import CategoryControls from '@/components/CategoryControls';
 import MasonryLayout from '@/components/MasonryLayout';
 import ProjectsGrid from '@/components/ProjectsGrid';
-import type { CategorizedProjects } from "@/types/projects";
+import type { CategorizedProjects, Category } from "@/types/projects";
+
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
 
 const breakpointColumns = {
   default: 5,
@@ -44,8 +60,10 @@ export default function Index() {
     });
     return initial;
   });
-  const [showOnlyFeatured, setShowOnlyFeatured] = useState(false);
+  const [showOnlyFeatured, setShowOnlyFeatured] = useState(true);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 150);
   const contentRef = useRef<HTMLDivElement>(null);
 
   const handleCategoryClick = (categoryKey: string) => {
@@ -59,42 +77,47 @@ export default function Index() {
     }));
   };
 
-  const toggleAllCategories = () => {
-    const areAllChecked = Object.values(visibleCategories).every(value => value);
-    const newValue = !areAllChecked;
+  const toggleFeatured = () => {
+    const nextShowOnlyFeatured = !showOnlyFeatured;
+    setShowOnlyFeatured(nextShowOnlyFeatured);
     
-    const updatedVisibility = Object.keys(visibleCategories).reduce((acc, category) => {
-      acc[category] = newValue;
-      return acc;
-    }, {} as Record<string, boolean>);
+    const updatedVisibility = { ...visibleCategories };
+    
+    if (nextShowOnlyFeatured) {
+      // Switching to featured only
+      Object.entries(categories).forEach(([key, category]) => {
+        updatedVisibility[key] = category.isPriority;
+      });
+    } else {
+      // Switching to all
+      Object.keys(categories).forEach(key => {
+        updatedVisibility[key] = true;
+      });
+    }
     
     setVisibleCategories(updatedVisibility);
-  };
-
-  const toggleFeatured = () => {
-    setShowOnlyFeatured(prev => !prev);
-    if (!showOnlyFeatured) {
-      // Switching to featured only
-      const updatedVisibility = { ...visibleCategories };
-      Object.entries(categories).forEach(([key, category]) => {
-        updatedVisibility[key] = category.isPriority
-      });
-      setVisibleCategories(updatedVisibility);
-    } else {
-      // Showing all
-      const updatedVisibility = Object.keys(visibleCategories).reduce((acc, category) => {
-        acc[category] = true;
-        return acc;
-      }, {} as Record<string, boolean>);
-      setVisibleCategories(updatedVisibility);
-    }
   };
 
   const sortedCategories = Object.entries(categories).sort((a, b) => 
     a[1].title.localeCompare(b[1].title)
   );
 
-  const areAllChecked = Object.values(visibleCategories).every(value => value);
+  const filteredCategories = sortedCategories
+    .filter(([key]) => visibleCategories[key])
+    .map(([key, category]) => {
+      if (!debouncedSearchQuery) return [key, category];
+
+      const query = debouncedSearchQuery.toLowerCase();
+      const filteredProjects = category.projects.filter(project => 
+        project.name.toLowerCase().includes(query) ||
+        project.description?.toLowerCase().includes(query)
+      );
+
+      if (filteredProjects.length === 0) return null;
+
+      return [key, { ...category, projects: filteredProjects }];
+    })
+    .filter((item): item is [string, Category] => item !== null);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white p-8">
@@ -112,10 +135,10 @@ export default function Index() {
           visibleCategories={visibleCategories}
           showOnlyFeatured={showOnlyFeatured}
           onToggleCategory={toggleCategory}
-          onToggleAllCategories={toggleAllCategories}
           onToggleFeatured={toggleFeatured}
           onShareClick={() => setShareDialogOpen(true)}
-          areAllChecked={areAllChecked}
+          searchValue={searchQuery}
+          onSearchChange={setSearchQuery}
         />
 
         <div ref={contentRef}>
@@ -128,19 +151,17 @@ export default function Index() {
           
           <AnimatePresence>
             <MasonryLayout breakpointColumns={breakpointColumns}>
-              {Object.entries(categories)
-                .filter(([key]) => visibleCategories[key])
-                .map(([key, category]) => (
-                  <CategoryCard
-                    key={key}
-                    title={category.title}
-                    color={category.color}
-                    projects={category.projects}
-                    onClick={() => handleCategoryClick(key)}
-                    isPriority={category.isPriority}
-                    slug={key}
-                  />
-                ))}
+              {filteredCategories.map(([key, category]) => (
+                <CategoryCard
+                  key={key}
+                  title={category.title}
+                  color={category.color}
+                  projects={category.projects}
+                  onClick={() => handleCategoryClick(key)}
+                  isPriority={category.isPriority}
+                  slug={key}
+                />
+              ))}
             </MasonryLayout>
           </AnimatePresence>
 

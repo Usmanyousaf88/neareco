@@ -1,8 +1,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Share2, Star } from 'lucide-react';
+import { Input } from "@/components/ui/input";
+import { Share2, Star, StarIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Category } from '@/types/projects';
 
@@ -11,80 +10,100 @@ interface CategoryControlsProps {
   visibleCategories: Record<string, boolean>;
   showOnlyFeatured: boolean;
   onToggleCategory: (category: string) => void;
-  onToggleAllCategories: () => void;
   onToggleFeatured: () => void;
   onShareClick: () => void;
-  areAllChecked: boolean;
+  searchValue: string;
+  onSearchChange: (value: string) => void;
 }
 
-const CategoryControls = ({
+const CategoryControls: React.FC<CategoryControlsProps> = ({
   categories,
   visibleCategories,
   showOnlyFeatured,
   onToggleCategory,
-  onToggleAllCategories,
   onToggleFeatured,
   onShareClick,
-  areAllChecked
-}: CategoryControlsProps) => {
+  searchValue,
+  onSearchChange,
+}) => {
+  const handleTagClick = (key: string) => {
+    onToggleCategory(key);
+  };
+
+  const handleFeaturedClick = () => {
+    const featuredCategories = categories
+      .filter(([_, category]) => category.isPriority)
+      .map(([key]) => key);
+    
+    const allCategories = categories.map(([key]) => key);
+    
+    if (showOnlyFeatured) {
+      // Switch to all categories
+      categories.forEach(([key]) => {
+        if (!visibleCategories[key]) {
+          onToggleCategory(key);
+        }
+      });
+    } else {
+      // Switch to featured categories only
+      categories.forEach(([key, category]) => {
+        if (category.isPriority && !visibleCategories[key]) {
+          onToggleCategory(key);
+        } else if (!category.isPriority && visibleCategories[key]) {
+          onToggleCategory(key);
+        }
+      });
+    }
+
+    onToggleFeatured();
+  };
+
   return (
     <motion.div 
-      className="flex flex-wrap gap-4 mb-8 justify-center"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ delay: 0.2 }}
+      layout
+      className="bg-gray-800/50 backdrop-blur-sm py-4 px-4 rounded-lg mb-8"
     >
-      <div className="w-full flex flex-wrap gap-4 justify-center items-center">
+      <div className="flex items-center gap-4 mb-6">
+        <div className="relative flex-1">
+          <Input
+            type="text"
+            placeholder="Search projects or filter by category..."
+            value={searchValue}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="w-full bg-gray-800 border-gray-700 focus:border-primary"
+          />
+        </div>
         <Button
           variant="outline"
-          size="sm"
-          onClick={onToggleAllCategories}
-          className="mb-4 bg-white/5 text-white hover:bg-white/10 hover:text-white border-white/20"
+          size="icon"
+          onClick={handleFeaturedClick}
+          className={showOnlyFeatured ? 'text-primary' : ''}
         >
-          {areAllChecked ? 'Uncheck All' : 'Check All'}
+          {showOnlyFeatured ? <StarIcon className="w-4 h-4 fill-current" /> : <Star className="w-4 h-4" />}
         </Button>
-
         <Button
           variant="outline"
-          size="sm"
-          onClick={onToggleFeatured}
-          className="mb-4 bg-white/5 text-white hover:bg-white/10 hover:text-white border-white/20"
-        >
-          <Star className="w-4 h-4 mr-2" />
-          {showOnlyFeatured ? 'Show All' : 'Show Featured'}
-        </Button>
-
-        <Button
-          variant="outline"
-          size="sm"
+          size="icon"
           onClick={onShareClick}
-          className="mb-4 bg-white/5 text-white hover:bg-white/10 hover:text-white border-white/20"
         >
-          <Share2 className="w-4 h-4 mr-2" />
-          Share
+          <Share2 className="w-4 h-4" />
         </Button>
       </div>
-      
-      <div className="w-full flex flex-wrap gap-4 justify-center">
+
+      <div className="flex flex-wrap gap-2">
         {categories.map(([key, category]) => (
-          <motion.div 
-            key={key} 
-            className="flex items-center space-x-2"
+          <motion.button
+            key={key}
+            onClick={() => handleTagClick(key)}
+            className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
+              visibleCategories[key]
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
+            }`}
             layout
           >
-            <Checkbox
-              id={`category-${key}`}
-              checked={visibleCategories[key]}
-              onCheckedChange={() => onToggleCategory(key)}
-              className="border-white data-[state=checked]:bg-white data-[state=checked]:text-black"
-            />
-            <Label
-              htmlFor={`category-${key}`}
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-white"
-            >
-              {category.title}
-            </Label>
-          </motion.div>
+            {category.title}
+          </motion.button>
         ))}
       </div>
     </motion.div>
