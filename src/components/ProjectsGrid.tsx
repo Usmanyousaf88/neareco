@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 interface Project {
   name: string;
   image: string;
-  tagline: string;
+  description?: string;
 }
 
 interface ProjectsGridProps {
@@ -29,9 +29,9 @@ const ProjectsGrid = ({ title, projects }: ProjectsGridProps) => {
               className="w-16 h-16 rounded-full mb-2 bg-white p-1"
             />
             <span className="text-sm text-center font-medium">{project.name}</span>
-            {project.tagline && (
+            {project.description && (
               <span className="text-xs text-gray-400 text-center mt-1 line-clamp-2">
-                {project.tagline}
+                {project.description}
               </span>
             )}
           </div>

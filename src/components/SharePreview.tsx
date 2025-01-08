@@ -33,7 +33,7 @@ const SharePreview = ({ categories, visibleCategories, theme }: SharePreviewProp
     const availableHeight = height - titleHeight - (padding * 2);
 
     // Use D3's treemap layout with more padding for titles
-    const treemap = d3.treemap<any>()
+    const treemap = d3.treemap<CategorizedProjects>()
       .size([availableWidth, availableHeight])
       .padding(32)
       .round(true);
@@ -59,6 +59,7 @@ const SharePreview = ({ categories, visibleCategories, theme }: SharePreviewProp
       .style('width', d => `${d.x1 - d.x0}px`)
       .style('height', d => `${d.y1 - d.y0}px`);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     cards.each(function(d: any) {
       const card = d3.select(this);
       const cardWidth = d.x1 - d.x0;

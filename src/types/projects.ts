@@ -1,7 +1,10 @@
 export interface Project {
+  id: string;
   name: string;
   image: string;
-  tagline: string;
+  description?: string;
+  links?: string[];
+  details?: ProjectDetails;
 }
 
 export interface Category {
@@ -11,9 +14,7 @@ export interface Category {
   isPriority: boolean;
 }
 
-export interface CategorizedProjects {
-  [key: string]: Category;
-}
+export type CategorizedProjects = Record<string, Category>;
 
 export interface ProjectsResponse {
   [key: string]: {
@@ -25,6 +26,38 @@ export interface ProjectsResponse {
       tagline: string;
       tags: {
         [key: string]: string;
+      };
+    };
+  };
+}
+
+export interface ProjectDetails {
+  slug: string;
+  profile: {
+    name: string;
+    tagline: string;
+    description: string;
+    image: {
+      url: string;
+    };
+    dapp?: string;
+    linktree?: {
+      website?: string;
+      twitter?: string;
+      medium?: string;
+      telegram?: string;
+      discord?: string;
+      github?: string;
+      nearsocial?: string;
+    };
+    tokens?: {
+      [key: string]: {
+        symbol: string;
+        name: string;
+        icon: {
+          thumb: string;
+          small: string;
+        };
       };
     };
   };

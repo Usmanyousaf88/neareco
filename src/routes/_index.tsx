@@ -1,13 +1,14 @@
-import React, { useState, useRef } from 'react';
-import { useToast } from "@/hooks/use-toast";
-import { useQuery } from '@tanstack/react-query';
-import CategoryCard from '@/components/CategoryCard';
-import ProjectsGrid from '@/components/ProjectsGrid';
-import MasonryLayout from '@/components/MasonryLayout';
-import { categorizeProjects } from '@/utils/projectUtils';
+import type { MetaFunction, LoaderFunction } from "@remix-run/cloudflare";
+import { useLoaderData } from "@remix-run/react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from 'framer-motion';
-import ShareDialog from '@/components/ShareDialog';
+import { getCategories } from "@/utils/projectUtils";
+import CategoryCard from "@/components/CategoryCard";
+import ShareDialog from "@/components/ShareDialog";
 import CategoryControls from '@/components/CategoryControls';
+import MasonryLayout from '@/components/MasonryLayout';
+import ProjectsGrid from '@/components/ProjectsGrid';
+import type { CategorizedProjects } from "@/types/projects";
 
 const breakpointColumns = {
   default: 5,
@@ -17,45 +18,35 @@ const breakpointColumns = {
   500: 1
 };
 
-const Index = () => {
+export const meta: MetaFunction = () => {
+  return [
+    { title: "NEAR Protocol Ecosystem Map" },
+    { name: "description", content: "Interactive map of the NEAR Protocol ecosystem" },
+  ];
+};
+
+interface LoaderData {
+  categories: CategorizedProjects;
+}
+
+export const loader: LoaderFunction = async () => {
+  const categories = await getCategories();
+  return Response.json({ categories });
+};
+
+export default function Index() {
+  const { categories } = useLoaderData<LoaderData>();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [visibleCategories, setVisibleCategories] = useState<Record<string, boolean>>({});
+  const [visibleCategories, setVisibleCategories] = useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {};
+    Object.entries(categories).forEach(([key, category]) => {
+      initial[key] = category.isPriority || key === 'aurora-virtual-chain';
+    });
+    return initial;
+  });
   const [showOnlyFeatured, setShowOnlyFeatured] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
-
-  const { data: projectsData, isLoading, error } = useQuery({
-    queryKey: ['projects'],
-    queryFn: async () => {
-      const response = await fetch('https://api.nearcatalog.xyz/projects');
-      if (!response.ok) throw new Error('Failed to fetch projects');
-      return response.json();
-    },
-  });
-
-  const categorizedProjects = React.useMemo(() => {
-    if (!projectsData) return {};
-    return categorizeProjects(projectsData);
-  }, [projectsData]);
-
-  React.useEffect(() => {
-    if (projectsData) {
-      const categories = Object.keys(categorizeProjects(projectsData));
-      const initialVisibility = categories.reduce((acc, category) => {
-        acc[category] = false;
-        return acc;
-      }, {} as Record<string, boolean>);
-
-      // Always show featured categories and aurora-virtual-chain
-      Object.entries(categorizeProjects(projectsData)).forEach(([key, category]) => {
-        if (category.isPriority || key === 'aurora-virtual-chain') {
-          initialVisibility[key] = true;
-        }
-      });
-
-      setVisibleCategories(initialVisibility);
-    }
-  }, [projectsData, showOnlyFeatured]);
 
   const handleCategoryClick = (categoryKey: string) => {
     setSelectedCategory(categoryKey);
@@ -85,7 +76,7 @@ const Index = () => {
     if (!showOnlyFeatured) {
       // Switching to featured only
       const updatedVisibility = { ...visibleCategories };
-      Object.entries(categorizedProjects).forEach(([key, category]) => {
+      Object.entries(categories).forEach(([key, category]) => {
         updatedVisibility[key] = category.isPriority
       });
       setVisibleCategories(updatedVisibility);
@@ -99,26 +90,7 @@ const Index = () => {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-white"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Error Loading Projects</h2>
-          <p className="text-red-400">Please try again later</p>
-        </div>
-      </div>
-    );
-  }
-
-  const sortedCategories = Object.entries(categorizedProjects).sort((a, b) => 
+  const sortedCategories = Object.entries(categories).sort((a, b) => 
     a[1].title.localeCompare(b[1].title)
   );
 
@@ -150,13 +122,13 @@ const Index = () => {
           <ShareDialog 
             open={shareDialogOpen}
             onOpenChange={setShareDialogOpen}
-            categories={categorizedProjects} 
+            categories={categories} 
             visibleCategories={visibleCategories}
           />
           
           <AnimatePresence>
             <MasonryLayout breakpointColumns={breakpointColumns}>
-              {Object.entries(categorizedProjects)
+              {Object.entries(categories)
                 .filter(([key]) => visibleCategories[key])
                 .map(([key, category]) => (
                   <CategoryCard
@@ -166,21 +138,20 @@ const Index = () => {
                     projects={category.projects}
                     onClick={() => handleCategoryClick(key)}
                     isPriority={category.isPriority}
+                    slug={key}
                   />
                 ))}
             </MasonryLayout>
           </AnimatePresence>
 
-          {selectedCategory && categorizedProjects[selectedCategory] && (
+          {selectedCategory && categories[selectedCategory] && (
             <ProjectsGrid
-              title={categorizedProjects[selectedCategory].title}
-              projects={categorizedProjects[selectedCategory].projects}
+              title={categories[selectedCategory].title}
+              projects={categories[selectedCategory].projects}
             />
           )}
         </div>
       </div>
     </div>
   );
-};
-
-export default Index;
+} 

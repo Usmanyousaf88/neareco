@@ -1,4 +1,5 @@
 import { ProjectsResponse, CategorizedProjects } from "@/types/projects";
+import { fetchProjects } from "./api";
 
 export const categoryColors: { [key: string]: string } = {
   community: "bg-violet-600",
@@ -119,9 +120,11 @@ export const categorizeProjects = (
       );
       if (!existingProject) {
         categories[tag].projects.push({
+          id: projectId,
           name: project.profile.name,
           image: project.profile.image.url,
-          tagline: project.profile.tagline,
+          description: project.profile.tagline,
+          links: [], // Add actual links when available
         });
       }
     });
@@ -141,3 +144,8 @@ export const categorizeProjects = (
     })
   );
 };
+
+export async function getCategories(): Promise<CategorizedProjects> {
+  const projectsData = await fetchProjects();
+  return categorizeProjects(projectsData);
+}
