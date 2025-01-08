@@ -118,15 +118,21 @@ const SharePreview = ({ categories, visibleCategories, theme }: SharePreviewProp
   }, [visibleCats, theme]);
 
   return (
-    <div className="w-[3840px] h-[2160px] text-left relative overflow-visible" 
-         ref={containerRef}
-         style={{ backgroundColor: theme.background }}>
-      <h1 className="text-4xl font-bold p-8" style={{ color: theme.titleText }}>
-        NEAR Protocol Ecosystem Map - nearprotocol.eco
-      </h1>
-      
-      <div className="grid-container absolute inset-0 pt-[80px] px-[20px] pb-[20px] overflow-visible">
-        {/* D3 will inject content here */}
+    <div 
+      className="w-[1920px] h-[1080px] text-left relative overflow-visible" 
+      ref={containerRef}
+      style={{ backgroundColor: theme.background }}
+    >
+      <div className="absolute inset-0" style={{ backgroundColor: theme.background }}>
+        <div className="h-[120px] flex items-center pl-[52px]">
+          <h1 className="text-6xl font-semibold" style={{ color: theme.titleText }}>
+            NEAR Protocol Ecosystem Map - nearprotocol.eco
+          </h1>
+        </div>
+        
+        <div className="grid-container absolute inset-0 pt-[120px] overflow-visible" >
+          {/* D3 will inject content here */}
+        </div>
       </div>
     </div>
   );

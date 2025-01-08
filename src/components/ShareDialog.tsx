@@ -22,20 +22,35 @@ const ShareDialog = ({ open, onOpenChange, categories, visibleCategories }: Shar
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (open && containerRef.current && previewRef.current) {
+    const calculateZoom = () => {
+      if (!containerRef.current || !previewRef.current) return;
+      
       const container = containerRef.current;
       const preview = previewRef.current;
       
       const containerWidth = container.clientWidth;
       const containerHeight = container.clientHeight;
-      const previewWidth = 3840;
-      const previewHeight = 2160;
+      const previewWidth = 1920;
+      const previewHeight = 1080;
       
       const horizontalScale = containerWidth / previewWidth;
       const verticalScale = containerHeight / previewHeight;
       
       const initialZoom = Math.min(horizontalScale, verticalScale) * 0.95;
       setZoom(initialZoom);
+    };
+
+    if (open) {
+      // Initial calculation with a small delay to ensure container is ready
+      const timer = setTimeout(calculateZoom, 100);
+      
+      // Handle window resize
+      window.addEventListener('resize', calculateZoom);
+      
+      return () => {
+        clearTimeout(timer);
+        window.removeEventListener('resize', calculateZoom);
+      };
     }
   }, [open]);
 

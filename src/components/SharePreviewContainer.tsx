@@ -18,23 +18,32 @@ const SharePreviewContainer = ({
   zoom,
   categories,
   visibleCategories,
-  theme
+  theme,
 }: SharePreviewContainerProps) => {
   return (
     <div 
       ref={containerRef}
-      className="flex-1 min-h-0 border rounded-lg overflow-auto relative"
+      className="flex-1 min-h-0 overflow-auto bg-gray-900 rounded-lg flex items-start justify-start"
     >
       <div 
-        ref={previewRef}
-        className="absolute origin-top-left"
-        style={{ transform: `scale(${zoom})` }}
+        className="relative flex-shrink-0"
+        style={{ 
+          width: 1920 * zoom,
+          height: 1080 * zoom,
+          transition: 'width 0.2s ease-out, height 0.2s ease-out'
+        }}
       >
-        <SharePreview 
-          categories={categories} 
-          visibleCategories={visibleCategories}
-          theme={theme}
-        />
+        <div 
+          className="origin-top-left absolute top-0 left-0 w-[1920px] h-[1080px]"
+          style={{ transform: `scale(${zoom})`, transition: 'transform 0.2s ease-out' }}
+          ref={previewRef}
+        >
+          <SharePreview
+            categories={categories}
+            visibleCategories={visibleCategories}
+            theme={theme}
+          />
+        </div>
       </div>
     </div>
   );
