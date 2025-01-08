@@ -23,7 +23,7 @@ const SharePreviewContainer = ({
   return (
     <div 
       ref={containerRef}
-      className="flex-1 min-h-0 border rounded-lg overflow-hidden relative"
+      className="flex-1 min-h-0 border rounded-lg overflow-auto relative"
     >
       <div 
         ref={previewRef}

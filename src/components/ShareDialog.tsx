@@ -28,8 +28,8 @@ const ShareDialog = ({ open, onOpenChange, categories, visibleCategories }: Shar
       
       const containerWidth = container.clientWidth;
       const containerHeight = container.clientHeight;
-      const previewWidth = 1920;
-      const previewHeight = 1080;
+      const previewWidth = 3840;
+      const previewHeight = 2160;
       
       const horizontalScale = containerWidth / previewWidth;
       const verticalScale = containerHeight / previewHeight;
@@ -49,7 +49,7 @@ const ShareDialog = ({ open, onOpenChange, categories, visibleCategories }: Shar
       const canvas = await html2canvas(previewRef.current, {
         width: 3840,
         height: 2160,
-        scale: 2,
+        scale: 1,
         backgroundColor: '#0A0F1C',
         logging: false,
         useCORS: true,
