@@ -7,6 +7,7 @@ import {
   ScrollRestoration,
 } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/cloudflare";
+import { Toaster } from "@/components/ui/toaster";
 import stylesheet from "./index.css?url";
 
 export const links: LinksFunction = () => [
@@ -24,6 +25,7 @@ export default function App() {
       </head>
       <body>
         <Outlet />
+        <Toaster />
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
