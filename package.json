@@ -7,7 +7,9 @@
     "build": "remix build",
     "dev": "remix dev --manual -c \"npm run start\"",
     "start": "wrangler pages dev ./public",
-    "typecheck": "tsc"
+    "typecheck": "tsc",
+    "pages:deploy": "npm run build && wrangler pages deploy ./public",
+    "pages:preview": "npm run build && wrangler pages dev ./public"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
