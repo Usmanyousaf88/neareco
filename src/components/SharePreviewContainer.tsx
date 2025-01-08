@@ -1,6 +1,7 @@
 import React from 'react';
 import SharePreview from './SharePreview';
 import { CategorizedProjects } from '@/types/projects';
+import { Theme } from '@/types/theme';
 
 interface SharePreviewContainerProps {
   containerRef: React.RefObject<HTMLDivElement>;
@@ -8,6 +9,7 @@ interface SharePreviewContainerProps {
   zoom: number;
   categories: CategorizedProjects;
   visibleCategories: Record<string, boolean>;
+  theme: Theme;
 }
 
 const SharePreviewContainer = ({
@@ -15,21 +17,23 @@ const SharePreviewContainer = ({
   previewRef,
   zoom,
   categories,
-  visibleCategories
+  visibleCategories,
+  theme
 }: SharePreviewContainerProps) => {
   return (
     <div 
       ref={containerRef}
-      className="flex-1 min-h-0 relative bg-gray-900 rounded-lg overflow-auto"
+      className="flex-1 min-h-0 border rounded-lg overflow-hidden relative"
     >
       <div 
         ref={previewRef}
-        className="origin-top-left transition-transform duration-200 ease-out absolute"
+        className="absolute origin-top-left"
         style={{ transform: `scale(${zoom})` }}
       >
         <SharePreview 
           categories={categories} 
           visibleCategories={visibleCategories}
+          theme={theme}
         />
       </div>
     </div>

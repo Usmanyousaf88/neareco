@@ -5,6 +5,7 @@ import html2canvas from 'html2canvas';
 import { CategorizedProjects } from '@/types/projects';
 import ShareDialogControls from './ShareDialogControls';
 import SharePreviewContainer from './SharePreviewContainer';
+import { THEMES } from '@/types/theme';
 
 interface ShareDialogProps {
   open: boolean;
@@ -16,6 +17,7 @@ interface ShareDialogProps {
 const ShareDialog = ({ open, onOpenChange, categories, visibleCategories }: ShareDialogProps) => {
   const { toast } = useToast();
   const [zoom, setZoom] = useState(1);
+  const [selectedTheme, setSelectedTheme] = useState(THEMES[0]);
   const previewRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -45,8 +47,8 @@ const ShareDialog = ({ open, onOpenChange, categories, visibleCategories }: Shar
       previewRef.current.style.transform = 'scale(1)';
       
       const canvas = await html2canvas(previewRef.current, {
-        width: 1920,
-        height: 1080,
+        width: 3840,
+        height: 2160,
         scale: 2,
         backgroundColor: '#0A0F1C',
         logging: false,
@@ -168,7 +170,23 @@ const ShareDialog = ({ open, onOpenChange, categories, visibleCategories }: Shar
             zoom={zoom}
             categories={categories}
             visibleCategories={visibleCategories}
+            theme={selectedTheme}
           />
+          
+          <div className="flex items-center gap-4 mb-4">
+            <label className="text-sm font-medium">Theme:</label>
+            <select 
+              className="bg-background border rounded px-2 py-1"
+              value={selectedTheme.name}
+              onChange={(e) => setSelectedTheme(THEMES.find(t => t.name === e.target.value) || THEMES[0])}
+            >
+              {THEMES.map(theme => (
+                <option key={theme.name} value={theme.name}>
+                  {theme.name}
+                </option>
+              ))}
+            </select>
+          </div>
           
           <ShareDialogControls
             zoom={zoom}

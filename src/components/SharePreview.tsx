@@ -1,13 +1,15 @@
 import React, { useEffect, useRef } from 'react';
 import { CategorizedProjects } from '@/types/projects';
 import * as d3 from 'd3';
+import { Theme } from '@/types/theme';
 
 interface SharePreviewProps {
   categories: CategorizedProjects;
   visibleCategories: Record<string, boolean>;
+  theme: Theme;
 }
 
-const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
+const SharePreview = ({ categories, visibleCategories, theme }: SharePreviewProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const visibleCats = Object.entries(categories)
@@ -68,14 +70,14 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
       const padding = 16;
       
       const maxColumns = Math.floor((cardWidth - padding * 2) / (minIconSize + padding + 32));
-      const maxRows = Math.floor((cardHeight - padding * 2 - 64) / (minIconSize + padding + 24));
+      const maxRows = Math.floor((cardHeight - padding * 2 - 64) / (minIconSize + padding + 32));
       
       const maxProjects = maxColumns * maxRows;
       const visibleProjects = category.projects.slice(0, maxProjects);
       
       const iconSize = Math.min(
         Math.floor((cardWidth - padding * (maxColumns + 1)) / maxColumns) - 32,
-        Math.floor((cardHeight - padding * (maxRows + 1) - 64) / maxRows) - 24,
+        Math.floor((cardHeight - padding * (maxRows + 1) - 64) / maxRows) - 32,
         maxIconSize
       );
 
@@ -85,8 +87,8 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
       };
 
       card.html(`
-        <div class="h-full bg-[#111827] border border-[#1d4ed8] rounded-xl p-4 flex flex-col overflow-visible">
-          <h2 class="text-xl font-semibold text-[#60a5fa] mb-4 line-clamp-1">
+        <div class="h-full rounded-xl p-4 flex flex-col overflow-visible" style="background-color: ${theme.cardBackground}; border: 1px solid ${theme.cardBorder}">
+          <h2 class="text-2xl font-semibold mb-6 leading-relaxed min-h-[2.5rem] overflow-visible" style="color: ${theme.categoryText}">
             ${category.title}
           </h2>
           <div class="grid gap-4 overflow-visible" style="grid-template-columns: repeat(auto-fill, minmax(${iconSize + 32}px, 1fr));">
@@ -101,8 +103,9 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
                     onerror="this.src='/placeholder.svg'"
                   />
                 </div>
-                <span class="text-white text-xs text-center w-full px-1 max-w-[${iconSize + 24}px] line-clamp-2 z-10" 
-                      title="${project.name}">
+                <span class="text-xs text-center w-full px-1 max-w-[${iconSize + 32}px] leading-normal min-h-[2.5em]" 
+                      title="${project.name}"
+                      style="color: ${theme.projectText}">
                   ${sanitizeName(project.name)}
                 </span>
               </div>
@@ -111,12 +114,14 @@ const SharePreview = ({ categories, visibleCategories }: SharePreviewProps) => {
         </div>
       `);
     });
-  }, [visibleCats]);
+  }, [visibleCats, theme]);
 
   return (
-    <div className="w-[3840px] h-[2160px] bg-[#0A0F1C] text-left relative overflow-visible" ref={containerRef}>
-      <h1 className="text-4xl font-bold text-white p-8">
-        NEAR Protocol Ecosystem Map
+    <div className="w-[3840px] h-[2160px] text-left relative overflow-visible" 
+         ref={containerRef}
+         style={{ backgroundColor: theme.background }}>
+      <h1 className="text-4xl font-bold p-8" style={{ color: theme.titleText }}>
+        NEAR Protocol Ecosystem Map - nearprotocol.eco
       </h1>
       
       <div className="grid-container absolute inset-0 pt-[80px] px-[20px] pb-[20px] overflow-visible">
